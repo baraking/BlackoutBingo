@@ -39,6 +39,7 @@ public class LocalGameManager : MonoBehaviour
     public Timer timer;
 
     public int scoreValue = 100;
+    public int bingoValue = 1000;
 
     public float timeIntervals;
     float lastNumberPull;
@@ -64,6 +65,10 @@ public class LocalGameManager : MonoBehaviour
 
     [SerializeField]
     public List<int>[] localBoardOptions = new List<int>[ROW_VALUE];
+
+    public int[,] boardLayout = new int[ROW_VALUE, ROW_VALUE];
+
+    public int[] eligableForBingo = new int[(ROW_VALUE + 1) * 2];
 
     void Start()
     {
@@ -114,6 +119,8 @@ public class LocalGameManager : MonoBehaviour
                 newTile.GetComponent<BingoTile>().UpdateLocalValue(localBoardOptions[j][index]);
                 newTile.transform.SetParent(bingoBoard.transform, false);
 
+                boardLayout[j,i] = localBoardOptions[j][index];
+
                 localBoardOptions[j].RemoveAt(index);
             }
         }
@@ -133,8 +140,7 @@ public class LocalGameManager : MonoBehaviour
 
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
         Debug.Log(newPulledValue);
-        possibleBalls.RemoveAt(index);
-        clickedTiles.Add(newPulledValue);
+        possibleBalls.RemoveAt(index);     
 
         lastNumberPull = gameLength;
         return newPulledValue;
@@ -157,7 +163,7 @@ public class LocalGameManager : MonoBehaviour
     {
         if (timer.isPlaying)
         {
-            int addedScore = CalculateNewAddedPoints(ballNumber);
+            int addedScore = CalculateNewAddedPoints(EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().localNumber);
             Debug.Log("addedScore: " + addedScore);
             if (addedScore > 0)
             {
@@ -166,13 +172,110 @@ public class LocalGameManager : MonoBehaviour
         }
     }
 
+    public void CheckForBingo()
+    {
+        if (!timer.isPlaying)
+        {
+            return;
+        }
+
+        int curAddedNumberOfBingos = 0;
+
+        string curStreak = "";
+        int curCheckValue = 0;
+
+        for(int i=0;i< ROW_VALUE; i++)
+        {
+            curCheckValue = 0;
+            curStreak = "";
+            for (int j=0;j< ROW_VALUE; j++)
+            {
+                curStreak += boardLayout[j, i] + ",";
+                if (clickedTiles.Contains(boardLayout[j, i]))
+                {
+                    curCheckValue++;
+                    
+                }
+            }
+            print(curStreak + "==" + curCheckValue);
+            if (curCheckValue== ROW_VALUE)
+            {
+                curAddedNumberOfBingos++;
+            }
+        }
+
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            curCheckValue = 0;
+            curStreak = "";
+            for (int j = 0; j < ROW_VALUE; j++)
+            {
+                curStreak += boardLayout[i, j] + ",";
+                if (clickedTiles.Contains(boardLayout[i, j]))
+                {
+                    curCheckValue++;
+                }
+            }
+            print(curStreak + "==" + curCheckValue);
+            if (curCheckValue == ROW_VALUE)
+            {
+                curAddedNumberOfBingos++;
+            }
+        }
+
+        curCheckValue = 0;
+        curStreak = "";
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            curStreak += boardLayout[i, i] + ",";
+            if (clickedTiles.Contains(boardLayout[i, i]))
+            {
+                curCheckValue++;
+            }
+        }
+        print(curStreak + "==" + curCheckValue);
+        if (curCheckValue == ROW_VALUE)
+        {
+            curAddedNumberOfBingos++;
+        }
+
+        curCheckValue = 0;
+        curStreak = "";
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            curStreak += boardLayout[ROW_VALUE - i - 1, i] + ",";
+            if (clickedTiles.Contains(boardLayout[ROW_VALUE - i - 1, i]))
+            {
+                curCheckValue++;
+            }
+        }
+        print(curStreak + "==" + curCheckValue);
+        if (curCheckValue == ROW_VALUE)
+        {
+            curAddedNumberOfBingos++;
+        }
+
+        if (curAddedNumberOfBingos > 0)
+        {
+            scoreBoard.AddPoints((int)Mathf.Pow(2, curAddedNumberOfBingos + 1) * bingoValue);
+            scoreBoard.AddBingos(curAddedNumberOfBingos);
+        }
+        print("Found " + curAddedNumberOfBingos + " bingos!");
+    }
+
     public int CalculateNewAddedPoints(int pulledBallValue)
     {
-        foreach(Ball ball in pulledBalls)
+        print("Clicked on " + EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().localNumber);
+
+        foreach (Ball ball in pulledBalls)
         {
             if(ball.ballValue == pulledBallValue)
             {
                 Debug.Log("Found Ball!");
+                if (!clickedTiles.Contains(newPulledValue))
+                {
+                    clickedTiles.Add(newPulledValue);
+                }
                 pulledBalls.Remove(ball);
                 EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
                 return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;
