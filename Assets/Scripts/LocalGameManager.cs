@@ -59,6 +59,8 @@ public class LocalGameManager : MonoBehaviour
     public List<Ball> pulledBalls = new List<Ball>();
     [SerializeField]
     public List<int> possibleBalls = new List<int>();
+    [SerializeField]
+    public List<int> clickedTiles = new List<int>();
 
     [SerializeField]
     public List<int>[] localBoardOptions = new List<int>[ROW_VALUE];
@@ -132,6 +134,7 @@ public class LocalGameManager : MonoBehaviour
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
         Debug.Log(newPulledValue);
         possibleBalls.RemoveAt(index);
+        clickedTiles.Add(newPulledValue);
 
         lastNumberPull = gameLength;
         return newPulledValue;

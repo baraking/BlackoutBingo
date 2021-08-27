@@ -10,10 +10,18 @@ public class BingoTile : MonoBehaviour
     public Image image;
     public TMP_Text myDisplayedNumber;
 
+    public float incorrectTimeMark = 0.1f;
+
     public void MarkAsPressedCorrectly()
     {
         image.color = Color.cyan;
         myDisplayedNumber.color = Color.white;
+    }
+
+    public void MarkANotPressed()
+    {
+        image.color = Color.white;
+        myDisplayedNumber.color = Color.black;
     }
 
     public void MarkAsPressedIncorrectly()
@@ -23,17 +31,20 @@ public class BingoTile : MonoBehaviour
 
     public IEnumerator MarkIncorrectForLimitedTime()
     {
-        print("Waiting!");
-        Color prevImageColor = image.color;
-        Color prevTextColor = myDisplayedNumber.color;
-
         image.color = Color.red;
         myDisplayedNumber.color = Color.white;
 
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(incorrectTimeMark);
 
-        image.color = prevImageColor;
-        myDisplayedNumber.color = prevTextColor;
+        if (LocalGameManager.Instance.clickedTiles.Contains(localNumber))
+        {
+            MarkAsPressedCorrectly();
+        }
+        else
+        {
+            MarkANotPressed();
+        }
+
     }
 
     public void UpdateLocalValue(int number)
