@@ -21,8 +21,11 @@ public class LocalGameManager : MonoBehaviour
         }
     }
 
-    public enum delayValues { VeryFast = 25, Fast = 75, Ok = 150, Slow = 300 };
+    public enum delayValues { VeryFast = 50, Fast = 100, Ok = 200, Slow = 300 };
     public enum delayScores { VeryFast = 5, Fast = 3, Ok = 2, Slow = 1 };
+
+    public static readonly int ROW_VALUE = 5;
+    public static readonly int NUMBER_THRESHOLD = 3;
 
     public ScoreBoard scoreBoard;
     public Timer timer;
@@ -31,6 +34,7 @@ public class LocalGameManager : MonoBehaviour
 
     public float timeIntervals;
     float lastNumberPull;
+    public int newPulledValue;
 
     public GameObject bingoTilePrefab;
     public GameObject bingoBoard;
@@ -39,7 +43,11 @@ public class LocalGameManager : MonoBehaviour
 
     [SerializeField]
     public List<Ball> pulledBalls = new List<Ball>();
-    public int tmpCounter;
+    [SerializeField]
+    public List<int> possibleBalls = new List<int>();
+
+    [SerializeField]
+    public List<int>[] localBoardOptions = new List<int>[ROW_VALUE];
 
     void Start()
     {
@@ -58,22 +66,47 @@ public class LocalGameManager : MonoBehaviour
 
     public void CreateBoard()
     {
-        for(int i = 1; i < 26; i++)
+        for(int i=0;i< localBoardOptions.GetLength(0); i++)
         {
-            GameObject newTile = Instantiate(bingoTilePrefab);
-            newTile.GetComponent<BingoTile>().UpdateLocalValue(i);
+            localBoardOptions[i] = new List<int>();
+            for (int j = 1; j <= ROW_VALUE * NUMBER_THRESHOLD; j++)
+            {
+                localBoardOptions[i].Add(j + i * ROW_VALUE * NUMBER_THRESHOLD);
+                //print(j + i * ROW_VALUE * NUMBER_THRESHOLD);
+                possibleBalls.Add(j + i * ROW_VALUE * NUMBER_THRESHOLD);
+            }
+        }
 
-            newTile.transform.SetParent(bingoBoard.transform, false);
+        var random = new System.Random();
+
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            for(int j = 0; j < ROW_VALUE; j++)
+            {
+                GameObject newTile = Instantiate(bingoTilePrefab);
+
+                int index = random.Next(localBoardOptions[j].Count);
+
+                newTile.GetComponent<BingoTile>().UpdateLocalValue(localBoardOptions[j][index]);
+                newTile.transform.SetParent(bingoBoard.transform, false);
+
+                localBoardOptions[j].RemoveAt(index);
+            }
         }
     }
 
     public int PullNumber()
     {
-        tmpCounter++;
-        pulledBalls.Add(new Ball(tmpCounter,gameLength));
-        Debug.Log(tmpCounter);
+        var random = new System.Random();
+        int index = random.Next(possibleBalls.Count);
+        newPulledValue = possibleBalls[index];
+
+        pulledBalls.Add(new Ball(newPulledValue, gameLength));
+        Debug.Log(newPulledValue);
+        possibleBalls.RemoveAt(index);
+
         lastNumberPull = gameLength;
-        return tmpCounter;
+        return newPulledValue;
     }
 
     public void Click(int ballNumber)
