@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LocalGameManager : MonoBehaviour
 {
@@ -21,8 +22,17 @@ public class LocalGameManager : MonoBehaviour
         }
     }
 
-    public enum delayValues { VeryFast = 25, Fast = 75, Ok = 150, Slow = 300 };
+    public enum delayValues { VeryFast = 50, Fast = 100, Ok = 200, Slow = 300 };
     public enum delayScores { VeryFast = 5, Fast = 3, Ok = 2, Slow = 1 };
+
+    public static readonly int ROW_VALUE = 5;
+    public static readonly int NUMBER_THRESHOLD = 3;
+
+    public static readonly string BINGO = "BINGO";
+    public static readonly Color[] COLORS = { Color.blue, Color.red, Color.magenta, Color.green, Color.yellow };
+
+    public static readonly int SHOWN_DRAWN_BALLS = 7;
+    public static readonly int DRAWN_BALLS_MOVEMENT_DISTANCE = 150;
 
     public ScoreBoard scoreBoard;
     public Timer timer;
@@ -31,16 +41,31 @@ public class LocalGameManager : MonoBehaviour
 
     public float timeIntervals;
     float lastNumberPull;
+    public int newPulledValue;
+
+    public GameObject bingoTilePrefab;
+    public GameObject bingoBoard;
+
+    public GameObject bingoColNamePrefab;
+    public GameObject bingoColNamesHeader;
+
+    public GameObject lastDrawnBallHolder;
+    public GameObject drawnBallPrefab;
 
     float gameLength;
 
     [SerializeField]
     public List<Ball> pulledBalls = new List<Ball>();
-    public int tmpCounter;
+    [SerializeField]
+    public List<int> possibleBalls = new List<int>();
+
+    [SerializeField]
+    public List<int>[] localBoardOptions = new List<int>[ROW_VALUE];
 
     void Start()
     {
         lastNumberPull = 0;
+        CreateBoard();
     }
 
     void Update()
@@ -52,13 +77,74 @@ public class LocalGameManager : MonoBehaviour
         }
     }
 
+    public void CreateBoard()
+    {
+        for(int i=0;i< localBoardOptions.GetLength(0); i++)
+        {
+            localBoardOptions[i] = new List<int>();
+            for (int j = 1; j <= ROW_VALUE * NUMBER_THRESHOLD; j++)
+            {
+                localBoardOptions[i].Add(j + i * ROW_VALUE * NUMBER_THRESHOLD);
+                //print(j + i * ROW_VALUE * NUMBER_THRESHOLD);
+                possibleBalls.Add(j + i * ROW_VALUE * NUMBER_THRESHOLD);
+            }
+        }
+
+        var random = new System.Random();
+
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            GameObject newColNameTile = Instantiate(bingoColNamePrefab);
+            newColNameTile.GetComponent<BingoTile>().UpdateLocalName(BINGO[i].ToString());
+            newColNameTile.GetComponent<Image>().color = COLORS[i];
+            newColNameTile.transform.SetParent(bingoColNamesHeader.transform, false);
+
+            for (int j = 0; j < ROW_VALUE; j++)
+            {
+                GameObject newTile = Instantiate(bingoTilePrefab);
+
+                int index = random.Next(localBoardOptions[j].Count);
+
+                newTile.GetComponent<BingoTile>().UpdateLocalValue(localBoardOptions[j][index]);
+                newTile.transform.SetParent(bingoBoard.transform, false);
+
+                localBoardOptions[j].RemoveAt(index);
+            }
+        }
+    }
+
     public int PullNumber()
     {
-        tmpCounter++;
-        pulledBalls.Add(new Ball(tmpCounter,gameLength));
-        Debug.Log(tmpCounter);
+        MovePreviouslyDrawnBallsASide();
+
+        var random = new System.Random();
+        int index = random.Next(possibleBalls.Count);
+        newPulledValue = possibleBalls[index];
+
+        GameObject lastDrawnBall = Instantiate(drawnBallPrefab);
+        lastDrawnBall.GetComponent<BingoTile>().UpdateLocalValue(newPulledValue);
+        lastDrawnBall.transform.SetParent(lastDrawnBallHolder.transform, false);
+
+        pulledBalls.Add(new Ball(newPulledValue, gameLength));
+        Debug.Log(newPulledValue);
+        possibleBalls.RemoveAt(index);
+
         lastNumberPull = gameLength;
-        return tmpCounter;
+        return newPulledValue;
+    }
+
+    public void MovePreviouslyDrawnBallsASide()
+    {
+        if(lastDrawnBallHolder.transform.childCount>= SHOWN_DRAWN_BALLS)
+        {
+            print(lastDrawnBallHolder.transform.GetChild(0).gameObject.name);
+            Destroy(lastDrawnBallHolder.transform.GetChild(0).gameObject);
+        }
+
+        foreach(Transform child in lastDrawnBallHolder.transform)
+        {
+            child.transform.position -= new Vector3(DRAWN_BALLS_MOVEMENT_DISTANCE, 0, 0);
+        }
     }
 
     public void Click(int ballNumber)
