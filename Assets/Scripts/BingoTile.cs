@@ -14,6 +14,11 @@ public class BingoTile : MonoBehaviour
         myDisplayedNumber.text = number.ToString();
     }
 
+    public void UpdateLocalName(string newName)
+    {
+        myDisplayedNumber.text = newName;
+    }
+
     // Start is called before the first frame update
     void Start()
     {

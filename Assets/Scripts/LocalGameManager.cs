@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LocalGameManager : MonoBehaviour
 {
@@ -27,6 +28,9 @@ public class LocalGameManager : MonoBehaviour
     public static readonly int ROW_VALUE = 5;
     public static readonly int NUMBER_THRESHOLD = 3;
 
+    public static readonly string BINGO = "BINGO";
+    public static readonly Color[] COLORS = { Color.blue, Color.red, Color.magenta, Color.green, Color.yellow };
+
     public ScoreBoard scoreBoard;
     public Timer timer;
 
@@ -38,6 +42,9 @@ public class LocalGameManager : MonoBehaviour
 
     public GameObject bingoTilePrefab;
     public GameObject bingoBoard;
+
+    public GameObject bingoColNamePrefab;
+    public GameObject bingoColNamesHeader;
 
     float gameLength;
 
@@ -81,7 +88,12 @@ public class LocalGameManager : MonoBehaviour
 
         for (int i = 0; i < ROW_VALUE; i++)
         {
-            for(int j = 0; j < ROW_VALUE; j++)
+            GameObject newColNameTile = Instantiate(bingoColNamePrefab);
+            newColNameTile.GetComponent<BingoTile>().UpdateLocalName(BINGO[i].ToString());
+            newColNameTile.GetComponent<Image>().color = COLORS[i];
+            newColNameTile.transform.SetParent(bingoColNamesHeader.transform, false);
+
+            for (int j = 0; j < ROW_VALUE; j++)
             {
                 GameObject newTile = Instantiate(bingoTilePrefab);
 
