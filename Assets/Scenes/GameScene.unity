@@ -340,7 +340,7 @@ MonoBehaviour:
   timer: {fileID: 328525759}
   scoreValue: 100
   bingoValue: 1000
-  timeIntervals: 1
+  timeIntervals: 2
   newPulledValue: 0
   bingoTilePrefab: {fileID: 8145099346891553784, guid: 4298f883e0bda6c46915f97d894bb6d7, type: 3}
   bingoBoard: {fileID: 494703004}
@@ -351,7 +351,7 @@ MonoBehaviour:
   pulledBalls: []
   possibleBalls: 
   clickedTiles: 
-  eligableForBingo: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  notEligableForBingo: 000000000000000000000000
 --- !u!4 &350207114
 Transform:
   m_ObjectHideFlags: 0

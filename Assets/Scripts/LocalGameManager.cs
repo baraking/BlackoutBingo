@@ -187,22 +187,18 @@ public class LocalGameManager : MonoBehaviour
 
         int curAddedNumberOfBingos = 0;
 
-        string curStreak = "";
         int curCheckValue = 0;
 
         for(int i=0;i< ROW_VALUE; i++)
         {
             curCheckValue = 0;
-            curStreak = "";
             for (int j=0;j< ROW_VALUE; j++)
             {
-                curStreak += boardLayout[j, i] + ",";
                 if (clickedTiles.Contains(boardLayout[j, i]))
                 {
                     curCheckValue++;
                 }
             }
-            print(curStreak + "==" + curCheckValue);
             if (curCheckValue== ROW_VALUE && !notEligableForBingo[curBingoCheck])
             {
                 curAddedNumberOfBingos++;
@@ -214,16 +210,13 @@ public class LocalGameManager : MonoBehaviour
         for (int i = 0; i < ROW_VALUE; i++)
         {
             curCheckValue = 0;
-            curStreak = "";
             for (int j = 0; j < ROW_VALUE; j++)
             {
-                curStreak += boardLayout[i, j] + ",";
                 if (clickedTiles.Contains(boardLayout[i, j]))
                 {
                     curCheckValue++;
                 }
             }
-            print(curStreak + "==" + curCheckValue);
             if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
             {
                 curAddedNumberOfBingos++;
@@ -233,16 +226,13 @@ public class LocalGameManager : MonoBehaviour
         }
 
         curCheckValue = 0;
-        curStreak = "";
         for (int i = 0; i < ROW_VALUE; i++)
         {
-            curStreak += boardLayout[i, i] + ",";
             if (clickedTiles.Contains(boardLayout[i, i]))
             {
                 curCheckValue++;
             }
         }
-        print(curStreak + "==" + curCheckValue);
         if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
         {
             curAddedNumberOfBingos++;
@@ -251,16 +241,13 @@ public class LocalGameManager : MonoBehaviour
         curBingoCheck++;
 
         curCheckValue = 0;
-        curStreak = "";
         for (int i = 0; i < ROW_VALUE; i++)
         {
-            curStreak += boardLayout[ROW_VALUE - i - 1, i] + ",";
             if (clickedTiles.Contains(boardLayout[ROW_VALUE - i - 1, i]))
             {
                 curCheckValue++;
             }
         }
-        print(curStreak + "==" + curCheckValue);
         if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
         {
             curAddedNumberOfBingos++;
@@ -272,7 +259,7 @@ public class LocalGameManager : MonoBehaviour
             scoreBoard.AddPoints((int)Mathf.Pow(2, curAddedNumberOfBingos + 1) * bingoValue);
             scoreBoard.AddBingos(curAddedNumberOfBingos);
         }
-        print("Found " + curAddedNumberOfBingos + " bingos!");
+        Debug.Log("Found " + curAddedNumberOfBingos + " new bingos!");
     }
 
     public int CalculateNewAddedPoints(int pulledBallValue)
