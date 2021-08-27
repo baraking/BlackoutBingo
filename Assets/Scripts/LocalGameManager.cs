@@ -171,10 +171,11 @@ public class LocalGameManager : MonoBehaviour
             {
                 Debug.Log("Found Ball!");
                 pulledBalls.Remove(ball);
-                EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressed();
+                EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
                 return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;
             }
         }
+        EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedIncorrectly();
         Debug.Log("Ball not Found!");
         return 0;
     }
