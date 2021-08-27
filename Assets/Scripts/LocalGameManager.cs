@@ -31,6 +31,9 @@ public class LocalGameManager : MonoBehaviour
     public static readonly string BINGO = "BINGO";
     public static readonly Color[] COLORS = { Color.blue, Color.red, Color.magenta, Color.green, Color.yellow };
 
+    public static readonly int SHOWN_DRAWN_BALLS = 7;
+    public static readonly int DRAWN_BALLS_MOVEMENT_DISTANCE = 150;
+
     public ScoreBoard scoreBoard;
     public Timer timer;
 
@@ -45,6 +48,9 @@ public class LocalGameManager : MonoBehaviour
 
     public GameObject bingoColNamePrefab;
     public GameObject bingoColNamesHeader;
+
+    public GameObject lastDrawnBallHolder;
+    public GameObject drawnBallPrefab;
 
     float gameLength;
 
@@ -109,9 +115,15 @@ public class LocalGameManager : MonoBehaviour
 
     public int PullNumber()
     {
+        MovePreviouslyDrawnBallsASide();
+
         var random = new System.Random();
         int index = random.Next(possibleBalls.Count);
         newPulledValue = possibleBalls[index];
+
+        GameObject lastDrawnBall = Instantiate(drawnBallPrefab);
+        lastDrawnBall.GetComponent<BingoTile>().UpdateLocalValue(newPulledValue);
+        lastDrawnBall.transform.SetParent(lastDrawnBallHolder.transform, false);
 
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
         Debug.Log(newPulledValue);
@@ -119,6 +131,20 @@ public class LocalGameManager : MonoBehaviour
 
         lastNumberPull = gameLength;
         return newPulledValue;
+    }
+
+    public void MovePreviouslyDrawnBallsASide()
+    {
+        if(lastDrawnBallHolder.transform.childCount>= SHOWN_DRAWN_BALLS)
+        {
+            print(lastDrawnBallHolder.transform.GetChild(0).gameObject.name);
+            Destroy(lastDrawnBallHolder.transform.GetChild(0).gameObject);
+        }
+
+        foreach(Transform child in lastDrawnBallHolder.transform)
+        {
+            child.transform.position -= new Vector3(DRAWN_BALLS_MOVEMENT_DISTANCE, 0, 0);
+        }
     }
 
     public void Click(int ballNumber)
