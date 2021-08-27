@@ -68,7 +68,7 @@ public class LocalGameManager : MonoBehaviour
 
     public int[,] boardLayout = new int[ROW_VALUE, ROW_VALUE];
 
-    public int[] eligableForBingo = new int[(ROW_VALUE + 1) * 2];
+    public bool[] notEligableForBingo = new bool[(ROW_VALUE + 1) * 2];
 
     void Start()
     {
@@ -140,7 +140,12 @@ public class LocalGameManager : MonoBehaviour
 
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
         Debug.Log(newPulledValue);
-        possibleBalls.RemoveAt(index);     
+        possibleBalls.RemoveAt(index);
+
+        if (possibleBalls.Count < 1)
+        {
+            timer.isPlaying = false;
+        }
 
         lastNumberPull = gameLength;
         return newPulledValue;
@@ -174,6 +179,7 @@ public class LocalGameManager : MonoBehaviour
 
     public void CheckForBingo()
     {
+        int curBingoCheck = 0;
         if (!timer.isPlaying)
         {
             return;
@@ -194,14 +200,15 @@ public class LocalGameManager : MonoBehaviour
                 if (clickedTiles.Contains(boardLayout[j, i]))
                 {
                     curCheckValue++;
-                    
                 }
             }
             print(curStreak + "==" + curCheckValue);
-            if (curCheckValue== ROW_VALUE)
+            if (curCheckValue== ROW_VALUE && !notEligableForBingo[curBingoCheck])
             {
                 curAddedNumberOfBingos++;
+                notEligableForBingo[curBingoCheck] = true;
             }
+            curBingoCheck++;
         }
 
         for (int i = 0; i < ROW_VALUE; i++)
@@ -217,10 +224,12 @@ public class LocalGameManager : MonoBehaviour
                 }
             }
             print(curStreak + "==" + curCheckValue);
-            if (curCheckValue == ROW_VALUE)
+            if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
             {
                 curAddedNumberOfBingos++;
+                notEligableForBingo[curBingoCheck] = true;
             }
+            curBingoCheck++;
         }
 
         curCheckValue = 0;
@@ -234,10 +243,12 @@ public class LocalGameManager : MonoBehaviour
             }
         }
         print(curStreak + "==" + curCheckValue);
-        if (curCheckValue == ROW_VALUE)
+        if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
         {
             curAddedNumberOfBingos++;
+            notEligableForBingo[curBingoCheck] = true;
         }
+        curBingoCheck++;
 
         curCheckValue = 0;
         curStreak = "";
@@ -250,9 +261,10 @@ public class LocalGameManager : MonoBehaviour
             }
         }
         print(curStreak + "==" + curCheckValue);
-        if (curCheckValue == ROW_VALUE)
+        if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
         {
             curAddedNumberOfBingos++;
+            notEligableForBingo[curBingoCheck] = true;
         }
 
         if (curAddedNumberOfBingos > 0)
@@ -265,16 +277,14 @@ public class LocalGameManager : MonoBehaviour
 
     public int CalculateNewAddedPoints(int pulledBallValue)
     {
-        print("Clicked on " + EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().localNumber);
-
         foreach (Ball ball in pulledBalls)
         {
             if(ball.ballValue == pulledBallValue)
             {
                 Debug.Log("Found Ball!");
-                if (!clickedTiles.Contains(newPulledValue))
+                if (!clickedTiles.Contains(pulledBallValue))
                 {
-                    clickedTiles.Add(newPulledValue);
+                    clickedTiles.Add(pulledBallValue);
                 }
                 pulledBalls.Remove(ball);
                 EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
