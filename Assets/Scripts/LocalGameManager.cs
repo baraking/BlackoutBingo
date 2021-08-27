@@ -32,6 +32,9 @@ public class LocalGameManager : MonoBehaviour
     public float timeIntervals;
     float lastNumberPull;
 
+    public GameObject bingoTilePrefab;
+    public GameObject bingoBoard;
+
     float gameLength;
 
     [SerializeField]
@@ -41,6 +44,7 @@ public class LocalGameManager : MonoBehaviour
     void Start()
     {
         lastNumberPull = 0;
+        CreateBoard();
     }
 
     void Update()
@@ -49,6 +53,17 @@ public class LocalGameManager : MonoBehaviour
         if(lastNumberPull + timeIntervals<= gameLength)
         {
             PullNumber();
+        }
+    }
+
+    public void CreateBoard()
+    {
+        for(int i = 1; i < 26; i++)
+        {
+            GameObject newTile = Instantiate(bingoTilePrefab);
+            newTile.GetComponent<BingoTile>().UpdateLocalValue(i);
+
+            newTile.transform.SetParent(bingoBoard.transform, false);
         }
     }
 

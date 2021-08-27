@@ -18,7 +18,7 @@ public class Timer : MonoBehaviour
         //Get pullInterval
 
         //Default to replace
-        seconds = 45;
+        seconds = 65;
 
         FormatTimeUnits();
         isPlaying = true;
