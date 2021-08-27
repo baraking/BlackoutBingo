@@ -15,10 +15,12 @@ public class Timer : MonoBehaviour
     void Start()
     {
         //Get Initial time setup
+        //Get pullInterval
 
         //Default to replace
         seconds = 75;
 
+        FormatTimeUnits();
         isPlaying = true;
     }
 
@@ -67,6 +69,11 @@ public class Timer : MonoBehaviour
         }
         ans += (int)seconds;
         return ans;
+    }
+
+    public float GetSecondsLeftForGame()
+    {
+        return minutes * 60 + seconds;
     }
 
     private void GameOver()
