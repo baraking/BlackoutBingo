@@ -18,7 +18,7 @@ public class Timer : MonoBehaviour
         //Get pullInterval
 
         //Default to replace
-        seconds = 75;
+        seconds = 45;
 
         FormatTimeUnits();
         isPlaying = true;
@@ -29,8 +29,8 @@ public class Timer : MonoBehaviour
         if (isPlaying)
         {
             seconds -= Time.deltaTime;
-            Debug.Log(seconds);
             FormatTimeUnits();
+            //Debug.Log(GetSecondsLeftForGame());
             countdownDisplay.text = FormatTimer();
         }
         else

@@ -13,6 +13,10 @@ public class PlayerHolder : MonoBehaviour
 
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Pressed " + LocalGameManager.Instance.tmpCounter);
+            LocalGameManager.Instance.Click(LocalGameManager.Instance.tmpCounter);
+        }
     }
 }

@@ -5,7 +5,7 @@ using TMPro;
 
 public class ScoreBoard : MonoBehaviour
 {
-    private int points = 1234567;
+    private int points = 0;
     public TMP_Text pointsDisplay;
 
     void Start()
@@ -16,7 +16,7 @@ public class ScoreBoard : MonoBehaviour
     public void AddPoints(int extraPoints)
     {
         points += extraPoints;
-        FormatPoints();
+        pointsDisplay.text = FormatPoints();
     }
 
     private string FormatPoints()
