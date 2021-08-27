@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class LocalGameManager : MonoBehaviour
@@ -70,10 +71,13 @@ public class LocalGameManager : MonoBehaviour
 
     void Update()
     {
-        gameLength += Time.deltaTime;
-        if(lastNumberPull + timeIntervals<= gameLength)
+        if (timer.isPlaying)
         {
-            PullNumber();
+            gameLength += Time.deltaTime;
+            if (lastNumberPull + timeIntervals <= gameLength)
+            {
+                PullNumber();
+            }
         }
     }
 
@@ -137,7 +141,6 @@ public class LocalGameManager : MonoBehaviour
     {
         if(lastDrawnBallHolder.transform.childCount>= SHOWN_DRAWN_BALLS)
         {
-            print(lastDrawnBallHolder.transform.GetChild(0).gameObject.name);
             Destroy(lastDrawnBallHolder.transform.GetChild(0).gameObject);
         }
 
@@ -149,11 +152,14 @@ public class LocalGameManager : MonoBehaviour
 
     public void Click(int ballNumber)
     {
-        int addedScore = CalculateNewAddedPoints(ballNumber);
-        Debug.Log("addedScore: " + addedScore);
-        if (addedScore > 0)
+        if (timer.isPlaying)
         {
-            scoreBoard.AddPoints(addedScore);
+            int addedScore = CalculateNewAddedPoints(ballNumber);
+            Debug.Log("addedScore: " + addedScore);
+            if (addedScore > 0)
+            {
+                scoreBoard.AddPoints(addedScore);
+            }
         }
     }
 
@@ -161,10 +167,12 @@ public class LocalGameManager : MonoBehaviour
     {
         foreach(Ball ball in pulledBalls)
         {
-            if(ball.ballValue== pulledBallValue)
+            if(ball.ballValue == pulledBallValue)
             {
                 Debug.Log("Found Ball!");
-                return GetPointsMultiplierBasedOnTime((gameLength - lastNumberPull) * 100) * scoreValue;
+                pulledBalls.Remove(ball);
+                EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressed();
+                return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;
             }
         }
         Debug.Log("Ball not Found!");
@@ -173,7 +181,7 @@ public class LocalGameManager : MonoBehaviour
 
     public int GetPointsMultiplierBasedOnTime(float time)
     {
-        Debug.Log(time);
+        //Debug.Log(time);
         if(time>=0 && time< (int)delayValues.VeryFast)
         {
             return (int)delayScores.VeryFast;

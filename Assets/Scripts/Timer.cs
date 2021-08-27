@@ -8,7 +8,7 @@ public class Timer : MonoBehaviour
     float seconds;
     int minutes;
 
-    bool isPlaying;
+    public bool isPlaying;
 
     public TMP_Text countdownDisplay;
 

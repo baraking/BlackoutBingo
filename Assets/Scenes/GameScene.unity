@@ -172,6 +172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dc173dcb3c32934189f5f8792c43c27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlaying: 0
   countdownDisplay: {fileID: 1536351336}
 --- !u!1 &350207112
 GameObject:
@@ -205,7 +206,7 @@ MonoBehaviour:
   scoreBoard: {fileID: 1354097486}
   timer: {fileID: 328525759}
   scoreValue: 100
-  timeIntervals: 2
+  timeIntervals: 3
   newPulledValue: 0
   bingoTilePrefab: {fileID: 8145099346891553784, guid: 4298f883e0bda6c46915f97d894bb6d7, type: 3}
   bingoBoard: {fileID: 494703004}
@@ -313,7 +314,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 553868815}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 450, y: 200, z: 0}
+  m_LocalPosition: {x: 500, y: 200, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 878628323}
