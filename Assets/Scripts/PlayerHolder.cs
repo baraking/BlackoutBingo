@@ -13,10 +13,9 @@ public class PlayerHolder : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            Debug.Log("Pressed " + LocalGameManager.Instance.newPulledValue);
-            LocalGameManager.Instance.Click(LocalGameManager.Instance.newPulledValue);
+            Debug.Log("Clicked!");
         }
     }
 }
