@@ -254,6 +254,7 @@ public class LocalGameManager : MonoBehaviour
             GameObject visualCue = AddBingoVisualCue();
             visualCue.transform.Rotate(new Vector3(0, 0, 135));
             visualCue.transform.position -= new Vector3(0, 215, 0);
+            visualCue.GetComponent<RectTransform>().sizeDelta = new Vector2(700, 75);
         }
         curBingoCheck++;
 
@@ -269,7 +270,10 @@ public class LocalGameManager : MonoBehaviour
         {
             curAddedNumberOfBingos++;
             notEligableForBingo[curBingoCheck] = true;
-            AddBingoVisualCue();
+            GameObject visualCue = AddBingoVisualCue();
+            visualCue.transform.Rotate(new Vector3(0, 0, 45));
+            visualCue.transform.position -= new Vector3(0, 215, 0);
+            visualCue.GetComponent<RectTransform>().sizeDelta = new Vector2(700, 75);
         }
 
         if (curAddedNumberOfBingos > 0)
