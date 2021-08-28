@@ -110,7 +110,7 @@ public class LocalGameManager : MonoBehaviour
 
                 newTile.GetComponent<BingoTile>().UpdateLocalValue(boardTiles[j + i * colValue]);
                 newTile.transform.SetParent(bingoBoard.transform, false);
-                boardLayout[i, j] = boardTiles[j + i * colValue];
+                boardLayout[j, i] = boardTiles[j + i * colValue];
             }
         }
     }
@@ -173,6 +173,9 @@ public class LocalGameManager : MonoBehaviour
         GameObject lastDrawnBall = Instantiate(drawnBallPrefab);
         lastDrawnBall.GetComponent<BingoTile>().UpdateLocalValue(newPulledValue);
         lastDrawnBall.transform.SetParent(lastDrawnBallHolder.transform, false);
+
+        int colorIndex = (newPulledValue - 1) / (ROW_VALUE * NUMBER_THRESHOLD);
+        lastDrawnBall.GetComponent<Image>().color = new Color(COLORS[colorIndex].r, COLORS[colorIndex].g, COLORS[colorIndex].b, 0.25f);
 
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
         Debug.Log(newPulledValue);

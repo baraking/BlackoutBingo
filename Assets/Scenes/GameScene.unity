@@ -318,6 +318,7 @@ GameObject:
   - component: {fileID: 350207114}
   - component: {fileID: 350207113}
   - component: {fileID: 350207115}
+  - component: {fileID: 350207116}
   m_Layer: 0
   m_Name: LocalGameManager
   m_TagString: Untagged
@@ -341,7 +342,7 @@ MonoBehaviour:
   timer: {fileID: 328525759}
   scoreValue: 100
   bingoValue: 1000
-  timeIntervals: 1
+  timeIntervals: 2
   newPulledValue: 0
   bingoTilePrefab: {fileID: 8145099346891553784, guid: 4298f883e0bda6c46915f97d894bb6d7, type: 3}
   bingoBoard: {fileID: 494703004}
@@ -355,6 +356,7 @@ MonoBehaviour:
   possibleBalls: 
   clickedTiles: 
   notEligableForBingo: 000000000000000000000000
+  audio: {fileID: 350207116}
 --- !u!4 &350207114
 Transform:
   m_ObjectHideFlags: 0
@@ -465,6 +467,25 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &350207116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 350207112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3b490145963e7c428be9bfe29e0365b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  miss: {fileID: 8300000, guid: 8bf04417d45046142b4a14a32c619d36, type: 3}
+  hit: {fileID: 8300000, guid: e81df4bd32cda9240b09a304f43aa3dd, type: 3}
+  powerup: {fileID: 8300000, guid: 676de451a2dd7e542a8ce30e0ef54942, type: 3}
+  gameover: {fileID: 8300000, guid: 7115fa96ac447fb40aca58b9ed8ec203, type: 3}
+  bingo: {fileID: 8300000, guid: 1a4c4ad105504df47966d1b2c92f96f0, type: 3}
+  casualMusic: {fileID: 8300000, guid: 34e6e3c31b86a984ba0c409a7a70535e, type: 3}
+  audioPlayer: {fileID: 350207115}
 --- !u!1 &380187878
 GameObject:
   m_ObjectHideFlags: 0
