@@ -73,10 +73,14 @@ public class LocalGameManager : MonoBehaviour
 
     public bool[] notEligableForBingo = new bool[(ROW_VALUE + 1) * 2];
 
+    public AudioManager audio;
+
     void Start()
     {
+        audio.GetComponent<AudioManager>();
         lastNumberPull = 0;
         CreateBoard();
+        audio.audioPlayer.PlayOneShot(audio.casualMusic, 0.25f);
     }
 
     void Update()
@@ -294,13 +298,16 @@ public class LocalGameManager : MonoBehaviour
                 if (!clickedTiles.Contains(pulledBallValue))
                 {
                     clickedTiles.Add(pulledBallValue);
+                    audio.audioPlayer.PlayOneShot(audio.hit,0.5f);
                 }
+
                 pulledBalls.Remove(ball);
                 EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
                 return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;
             }
         }
         EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedIncorrectly();
+        audio.audioPlayer.PlayOneShot(audio.miss, 0.5f);
         Debug.Log("Ball not Found!");
         return 0;
     }

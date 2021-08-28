@@ -8,6 +8,8 @@ public class Timer : MonoBehaviour
     float seconds;
     int minutes;
 
+    bool wasGameOverPlayedAlready = false;
+
     public bool isPlaying;
 
     public TMP_Text countdownDisplay;
@@ -35,7 +37,11 @@ public class Timer : MonoBehaviour
         }
         else
         {
-            GameOver();
+            if (!wasGameOverPlayedAlready)
+            {
+                wasGameOverPlayedAlready = true;
+                GameOver();
+            }
         }
     }
 
@@ -79,5 +85,7 @@ public class Timer : MonoBehaviour
     private void GameOver()
     {
         Debug.Log("Times Up!");
+        LocalGameManager.Instance.audio.audioPlayer.Stop();
+        LocalGameManager.Instance.audio.audioPlayer.PlayOneShot(LocalGameManager.Instance.audio.gameover, 0.5f);
     }
 }
