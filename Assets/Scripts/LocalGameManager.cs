@@ -54,6 +54,9 @@ public class LocalGameManager : MonoBehaviour
     public GameObject lastDrawnBallHolder;
     public GameObject drawnBallPrefab;
 
+    public GameObject bingoVisualCue;
+    public GameObject bingoVisualCuesHolder;
+
     float gameLength;
 
     [SerializeField]
@@ -177,6 +180,13 @@ public class LocalGameManager : MonoBehaviour
         }
     }
 
+    private GameObject AddBingoVisualCue()
+    {
+        GameObject newBingoVisualCue = Instantiate(bingoVisualCue);
+        newBingoVisualCue.transform.SetParent(bingoVisualCuesHolder.transform, false);
+        return newBingoVisualCue;
+    }
+
     public void CheckForBingo()
     {
         int curBingoCheck = 0;
@@ -203,6 +213,7 @@ public class LocalGameManager : MonoBehaviour
             {
                 curAddedNumberOfBingos++;
                 notEligableForBingo[curBingoCheck] = true;
+                AddBingoVisualCue().transform.position -= new Vector3(0, 105*i, 0);
             }
             curBingoCheck++;
         }
@@ -221,6 +232,9 @@ public class LocalGameManager : MonoBehaviour
             {
                 curAddedNumberOfBingos++;
                 notEligableForBingo[curBingoCheck] = true;
+                GameObject visualCue = AddBingoVisualCue();
+                visualCue.transform.Rotate(new Vector3(0,0,90));
+                visualCue.transform.position -= new Vector3(212.5f - 105*i, 200, 0);
             }
             curBingoCheck++;
         }
@@ -237,6 +251,9 @@ public class LocalGameManager : MonoBehaviour
         {
             curAddedNumberOfBingos++;
             notEligableForBingo[curBingoCheck] = true;
+            GameObject visualCue = AddBingoVisualCue();
+            visualCue.transform.Rotate(new Vector3(0, 0, 135));
+            visualCue.transform.position -= new Vector3(0, 215, 0);
         }
         curBingoCheck++;
 
@@ -252,6 +269,7 @@ public class LocalGameManager : MonoBehaviour
         {
             curAddedNumberOfBingos++;
             notEligableForBingo[curBingoCheck] = true;
+            AddBingoVisualCue();
         }
 
         if (curAddedNumberOfBingos > 0)
