@@ -79,7 +79,7 @@ public class LocalGameManager : MonoBehaviour
     {
         audio.GetComponent<AudioManager>();
         lastNumberPull = 0;
-        CreateBoard();
+        GenerateBoardFromGivenData(ROW_VALUE, ROW_VALUE, CreateBoard());
         audio.audioPlayer.PlayOneShot(audio.casualMusic, 0.25f);
     }
 
@@ -90,12 +90,32 @@ public class LocalGameManager : MonoBehaviour
             gameLength += Time.deltaTime;
             if (lastNumberPull + timeIntervals <= gameLength)
             {
-                PullNumber();
+                RecievePulledNumber(PullNumber());
             }
         }
     }
 
-    public void CreateBoard()
+    public void GenerateBoardFromGivenData(int rowValue,int colValue, int[] boardTiles)
+    {
+        for (int i = 0; i < colValue; i++)
+        {
+            GameObject newColNameTile = Instantiate(bingoColNamePrefab);
+            newColNameTile.GetComponent<BingoTile>().UpdateLocalName(BINGO[i].ToString());
+            newColNameTile.GetComponent<Image>().color = COLORS[i];
+            newColNameTile.transform.SetParent(bingoColNamesHeader.transform, false);
+
+            for (int j = 0; j < rowValue; j++)
+            {
+                GameObject newTile = Instantiate(bingoTilePrefab);
+
+                newTile.GetComponent<BingoTile>().UpdateLocalValue(boardTiles[j + i * colValue]);
+                newTile.transform.SetParent(bingoBoard.transform, false);
+                boardLayout[i, j] = boardTiles[j + i * colValue];
+            }
+        }
+    }
+
+    public int[] CreateBoard()
     {
         for(int i=0;i< localBoardOptions.GetLength(0); i++)
         {
@@ -109,6 +129,7 @@ public class LocalGameManager : MonoBehaviour
         }
 
         var random = new System.Random();
+        int[] boardDataToSend = new int[ROW_VALUE * ROW_VALUE];
 
         for (int i = 0; i < ROW_VALUE; i++)
         {
@@ -119,27 +140,35 @@ public class LocalGameManager : MonoBehaviour
 
             for (int j = 0; j < ROW_VALUE; j++)
             {
-                GameObject newTile = Instantiate(bingoTilePrefab);
-
                 int index = random.Next(localBoardOptions[j].Count);
-
-                newTile.GetComponent<BingoTile>().UpdateLocalValue(localBoardOptions[j][index]);
-                newTile.transform.SetParent(bingoBoard.transform, false);
-
-                boardLayout[j,i] = localBoardOptions[j][index];
-
+                boardDataToSend[j+i*ROW_VALUE] = localBoardOptions[j][index];
                 localBoardOptions[j].RemoveAt(index);
             }
         }
+        return boardDataToSend;
     }
 
     public int PullNumber()
     {
-        MovePreviouslyDrawnBallsASide();
-
         var random = new System.Random();
         int index = random.Next(possibleBalls.Count);
         newPulledValue = possibleBalls[index];
+
+        possibleBalls.RemoveAt(index);
+
+        if (possibleBalls.Count < 1)
+        {
+            timer.isPlaying = false;
+            //should notify all players to stop play
+        }
+
+        lastNumberPull = gameLength;
+        return newPulledValue;
+    }
+
+    public void RecievePulledNumber(int newNumber)
+    {
+        MovePreviouslyDrawnBallsASide();
 
         GameObject lastDrawnBall = Instantiate(drawnBallPrefab);
         lastDrawnBall.GetComponent<BingoTile>().UpdateLocalValue(newPulledValue);
@@ -147,15 +176,6 @@ public class LocalGameManager : MonoBehaviour
 
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
         Debug.Log(newPulledValue);
-        possibleBalls.RemoveAt(index);
-
-        if (possibleBalls.Count < 1)
-        {
-            timer.isPlaying = false;
-        }
-
-        lastNumberPull = gameLength;
-        return newPulledValue;
     }
 
     public void MovePreviouslyDrawnBallsASide()
