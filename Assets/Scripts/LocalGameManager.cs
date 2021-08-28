@@ -284,6 +284,7 @@ public class LocalGameManager : MonoBehaviour
         {
             scoreBoard.AddPoints((int)Mathf.Pow(2, curAddedNumberOfBingos + 1) * bingoValue);
             scoreBoard.AddBingos(curAddedNumberOfBingos);
+            audio.audioPlayer.PlayOneShot(audio.bingo, 0.25f);
         }
         Debug.Log("Found " + curAddedNumberOfBingos + " new bingos!");
     }
