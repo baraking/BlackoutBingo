@@ -39,6 +39,7 @@ public class LocalGameManager : MonoBehaviour
     public Timer timer;
 
     public int scoreValue = 100;
+    public int bingoValue = 1000;
 
     public float timeIntervals;
     float lastNumberPull;
@@ -53,6 +54,9 @@ public class LocalGameManager : MonoBehaviour
     public GameObject lastDrawnBallHolder;
     public GameObject drawnBallPrefab;
 
+    public GameObject bingoVisualCue;
+    public GameObject bingoVisualCuesHolder;
+
     float gameLength;
 
     [SerializeField]
@@ -64,6 +68,10 @@ public class LocalGameManager : MonoBehaviour
 
     [SerializeField]
     public List<int>[] localBoardOptions = new List<int>[ROW_VALUE];
+
+    public int[,] boardLayout = new int[ROW_VALUE, ROW_VALUE];
+
+    public bool[] notEligableForBingo = new bool[(ROW_VALUE + 1) * 2];
 
     void Start()
     {
@@ -114,6 +122,8 @@ public class LocalGameManager : MonoBehaviour
                 newTile.GetComponent<BingoTile>().UpdateLocalValue(localBoardOptions[j][index]);
                 newTile.transform.SetParent(bingoBoard.transform, false);
 
+                boardLayout[j,i] = localBoardOptions[j][index];
+
                 localBoardOptions[j].RemoveAt(index);
             }
         }
@@ -134,7 +144,11 @@ public class LocalGameManager : MonoBehaviour
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
         Debug.Log(newPulledValue);
         possibleBalls.RemoveAt(index);
-        clickedTiles.Add(newPulledValue);
+
+        if (possibleBalls.Count < 1)
+        {
+            timer.isPlaying = false;
+        }
 
         lastNumberPull = gameLength;
         return newPulledValue;
@@ -157,7 +171,7 @@ public class LocalGameManager : MonoBehaviour
     {
         if (timer.isPlaying)
         {
-            int addedScore = CalculateNewAddedPoints(ballNumber);
+            int addedScore = CalculateNewAddedPoints(EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().localNumber);
             Debug.Log("addedScore: " + addedScore);
             if (addedScore > 0)
             {
@@ -166,13 +180,121 @@ public class LocalGameManager : MonoBehaviour
         }
     }
 
+    private GameObject AddBingoVisualCue()
+    {
+        GameObject newBingoVisualCue = Instantiate(bingoVisualCue);
+        newBingoVisualCue.transform.SetParent(bingoVisualCuesHolder.transform, false);
+        return newBingoVisualCue;
+    }
+
+    public void CheckForBingo()
+    {
+        int curBingoCheck = 0;
+        if (!timer.isPlaying)
+        {
+            return;
+        }
+
+        int curAddedNumberOfBingos = 0;
+
+        int curCheckValue = 0;
+
+        for(int i=0;i< ROW_VALUE; i++)
+        {
+            curCheckValue = 0;
+            for (int j=0;j< ROW_VALUE; j++)
+            {
+                if (clickedTiles.Contains(boardLayout[j, i]))
+                {
+                    curCheckValue++;
+                }
+            }
+            if (curCheckValue== ROW_VALUE && !notEligableForBingo[curBingoCheck])
+            {
+                curAddedNumberOfBingos++;
+                notEligableForBingo[curBingoCheck] = true;
+                AddBingoVisualCue().transform.position -= new Vector3(0, 105*i, 0);
+            }
+            curBingoCheck++;
+        }
+
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            curCheckValue = 0;
+            for (int j = 0; j < ROW_VALUE; j++)
+            {
+                if (clickedTiles.Contains(boardLayout[i, j]))
+                {
+                    curCheckValue++;
+                }
+            }
+            if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
+            {
+                curAddedNumberOfBingos++;
+                notEligableForBingo[curBingoCheck] = true;
+                GameObject visualCue = AddBingoVisualCue();
+                visualCue.transform.Rotate(new Vector3(0,0,90));
+                visualCue.transform.position -= new Vector3(212.5f - 105*i, 200, 0);
+            }
+            curBingoCheck++;
+        }
+
+        curCheckValue = 0;
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            if (clickedTiles.Contains(boardLayout[i, i]))
+            {
+                curCheckValue++;
+            }
+        }
+        if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
+        {
+            curAddedNumberOfBingos++;
+            notEligableForBingo[curBingoCheck] = true;
+            GameObject visualCue = AddBingoVisualCue();
+            visualCue.transform.Rotate(new Vector3(0, 0, 135));
+            visualCue.transform.position -= new Vector3(0, 215, 0);
+            visualCue.GetComponent<RectTransform>().sizeDelta = new Vector2(700, 75);
+        }
+        curBingoCheck++;
+
+        curCheckValue = 0;
+        for (int i = 0; i < ROW_VALUE; i++)
+        {
+            if (clickedTiles.Contains(boardLayout[ROW_VALUE - i - 1, i]))
+            {
+                curCheckValue++;
+            }
+        }
+        if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
+        {
+            curAddedNumberOfBingos++;
+            notEligableForBingo[curBingoCheck] = true;
+            GameObject visualCue = AddBingoVisualCue();
+            visualCue.transform.Rotate(new Vector3(0, 0, 45));
+            visualCue.transform.position -= new Vector3(0, 215, 0);
+            visualCue.GetComponent<RectTransform>().sizeDelta = new Vector2(700, 75);
+        }
+
+        if (curAddedNumberOfBingos > 0)
+        {
+            scoreBoard.AddPoints((int)Mathf.Pow(2, curAddedNumberOfBingos + 1) * bingoValue);
+            scoreBoard.AddBingos(curAddedNumberOfBingos);
+        }
+        Debug.Log("Found " + curAddedNumberOfBingos + " new bingos!");
+    }
+
     public int CalculateNewAddedPoints(int pulledBallValue)
     {
-        foreach(Ball ball in pulledBalls)
+        foreach (Ball ball in pulledBalls)
         {
             if(ball.ballValue == pulledBallValue)
             {
                 Debug.Log("Found Ball!");
+                if (!clickedTiles.Contains(pulledBallValue))
+                {
+                    clickedTiles.Add(pulledBallValue);
+                }
                 pulledBalls.Remove(ball);
                 EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
                 return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;

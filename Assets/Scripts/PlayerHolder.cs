@@ -15,7 +15,7 @@ public class PlayerHolder : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            Debug.Log("Clicked!");
+            //Debug.Log("Clicked!");
         }
     }
 }
