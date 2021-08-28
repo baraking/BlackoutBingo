@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class BingoTile : MonoBehaviour
 {
-    int localNumber;
+    public int localNumber;
     public Image image;
     public TMP_Text myDisplayedNumber;
 
