@@ -14,11 +14,13 @@ public class ScoreBoard : MonoBehaviour
     private float multiplierTimeLeft;
 
     public TMP_Text pointsDisplay;
+    public TMP_Text currentMultiplier;
 
     void Start()
     {
         pointsDisplay.text = FormatPoints();
         pointsMultiplier = ORIGINAL_POINTS_MULTIPLIER;
+        FormatMultiplier();
     }
 
     private void Update()
@@ -48,16 +50,23 @@ public class ScoreBoard : MonoBehaviour
     public void AddMultiplier(int multiplier,float time)
     {
         pointsMultiplier *= multiplier;
+        FormatMultiplier();
         multiplierTimeLeft += time;
     }
 
     private void ResetMultipliers()
     {
         pointsMultiplier = ORIGINAL_POINTS_MULTIPLIER;
+        FormatMultiplier();
     }
 
     private string FormatPoints()
     {
         return points.ToString("n0");
+    }
+
+    private void FormatMultiplier()
+    {
+        currentMultiplier.text = "X" + pointsMultiplier;
     }
 }

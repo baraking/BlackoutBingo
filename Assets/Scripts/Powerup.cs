@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Powerup : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class Powerup : MonoBehaviour
     public delegate void PowerupAction();
     PowerupAction myAction;
 
+    public TMP_Text powerupText;
+
     void Start()
     {
         myAction = NoPowerup;
@@ -23,11 +26,6 @@ public class Powerup : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G))
         {
             ChooseNewPowerup();
-        }
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            ActivatePowerup();
         }
     }
 
@@ -40,10 +38,12 @@ public class Powerup : MonoBehaviour
         if (powerupIndex == (int)PowerupTypes.AddTime)
         {
             myAction = AddTime;
+            powerupText.text = "Time";
         }
         else if (powerupIndex == (int)PowerupTypes.MultiplyPoints)
         {
             myAction = MultiplyPoints;
+            powerupText.text = "X2";
         }
         else
         {
@@ -61,6 +61,7 @@ public class Powerup : MonoBehaviour
     public void ResetPowerup()
     {
         myAction = NoPowerup;
+        powerupText.text = "";
     }
 
     public void NoPowerup()
