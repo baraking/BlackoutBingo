@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class Powerup : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class Powerup : MonoBehaviour
 
     public static readonly int TIME_TO_ADD=10;
     public static readonly int POINTS_MULTIPLIER = 2;
-    public static readonly int TIME_FOR_POINTS_MULTIPLIER = 5;
+    public static readonly int TIME_FOR_POINTS_MULTIPLIER = 10;
 
     public static readonly int FILLED_METER = 100;
 
@@ -18,24 +19,27 @@ public class Powerup : MonoBehaviour
 
     public float powerupMeterValue;
 
+    public Slider meter;
+    public Image meterImage;
+
+    public Color originalMeterColor;
+    public Color filledMeterColor;
+
     public TMP_Text powerupText;
 
     void Start()
     {
         myAction = NoPowerup;
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            ChooseNewPowerup();
-        }
+        meter.maxValue = FILLED_METER;
+        meter.minValue = 0;
+        meter.value = 0;
     }
 
     public void ResetMeter()
     {
         powerupMeterValue = 0;
+        meter.value = 0;
+        meterImage.color = originalMeterColor;
     }
 
     public void FillMeter(float valueToFill)
@@ -54,6 +58,16 @@ public class Powerup : MonoBehaviour
         else if (powerupMeterValue < FILLED_METER)
         {
             ResetPowerup();
+        }
+        meter.value = powerupMeterValue;
+
+        if (meter.value == FILLED_METER)
+        {
+            meterImage.color = filledMeterColor;
+        }
+        else
+        {
+            meterImage.color = originalMeterColor;
         }
     }
 
