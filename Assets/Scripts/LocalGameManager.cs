@@ -25,6 +25,7 @@ public class LocalGameManager : MonoBehaviour
 
     public enum delayValues { VeryFast = 50, Fast = 100, Ok = 200, Slow = 300 };
     public enum delayScores { VeryFast = 5, Fast = 3, Ok = 2, Slow = 1 };
+    public enum meterScores { VeryFast = 100, Fast = 60, Ok = 30, Slow = 15 };
 
     public static readonly int ROW_VALUE = 5;
     public static readonly int NUMBER_THRESHOLD = 3;
@@ -37,9 +38,11 @@ public class LocalGameManager : MonoBehaviour
 
     public ScoreBoard scoreBoard;
     public Timer timer;
+    public Powerup powerup;
 
     public int scoreValue = 100;
     public int bingoValue = 1000;
+    public int powerupMissPenalty = 25;
 
     public float timeIntervals;
     float lastNumberPull;
@@ -79,7 +82,7 @@ public class LocalGameManager : MonoBehaviour
     {
         audio.GetComponent<AudioManager>();
         lastNumberPull = 0;
-        CreateBoard();
+        GenerateBoardFromGivenData(ROW_VALUE, ROW_VALUE, CreateBoard());
         audio.audioPlayer.PlayOneShot(audio.casualMusic, 0.25f);
     }
 
@@ -90,12 +93,32 @@ public class LocalGameManager : MonoBehaviour
             gameLength += Time.deltaTime;
             if (lastNumberPull + timeIntervals <= gameLength)
             {
-                PullNumber();
+                RecievePulledNumber(PullNumber());
             }
         }
     }
 
-    public void CreateBoard()
+    public void GenerateBoardFromGivenData(int rowValue,int colValue, int[] boardTiles)
+    {
+        for (int i = 0; i < colValue; i++)
+        {
+            GameObject newColNameTile = Instantiate(bingoColNamePrefab);
+            newColNameTile.GetComponent<BingoTile>().UpdateLocalName(BINGO[i].ToString());
+            newColNameTile.GetComponent<Image>().color = COLORS[i];
+            newColNameTile.transform.SetParent(bingoColNamesHeader.transform, false);
+
+            for (int j = 0; j < rowValue; j++)
+            {
+                GameObject newTile = Instantiate(bingoTilePrefab);
+
+                newTile.GetComponent<BingoTile>().UpdateLocalValue(boardTiles[j + i * colValue]);
+                newTile.transform.SetParent(bingoBoard.transform, false);
+                boardLayout[j, i] = boardTiles[j + i * colValue];
+            }
+        }
+    }
+
+    public int[] CreateBoard()
     {
         for(int i=0;i< localBoardOptions.GetLength(0); i++)
         {
@@ -109,6 +132,7 @@ public class LocalGameManager : MonoBehaviour
         }
 
         var random = new System.Random();
+        int[] boardDataToSend = new int[ROW_VALUE * ROW_VALUE];
 
         for (int i = 0; i < ROW_VALUE; i++)
         {
@@ -119,43 +143,45 @@ public class LocalGameManager : MonoBehaviour
 
             for (int j = 0; j < ROW_VALUE; j++)
             {
-                GameObject newTile = Instantiate(bingoTilePrefab);
-
                 int index = random.Next(localBoardOptions[j].Count);
-
-                newTile.GetComponent<BingoTile>().UpdateLocalValue(localBoardOptions[j][index]);
-                newTile.transform.SetParent(bingoBoard.transform, false);
-
-                boardLayout[j,i] = localBoardOptions[j][index];
-
+                boardDataToSend[j+i*ROW_VALUE] = localBoardOptions[j][index];
                 localBoardOptions[j].RemoveAt(index);
             }
         }
+        return boardDataToSend;
     }
 
     public int PullNumber()
     {
-        MovePreviouslyDrawnBallsASide();
-
         var random = new System.Random();
         int index = random.Next(possibleBalls.Count);
         newPulledValue = possibleBalls[index];
 
-        GameObject lastDrawnBall = Instantiate(drawnBallPrefab);
-        lastDrawnBall.GetComponent<BingoTile>().UpdateLocalValue(newPulledValue);
-        lastDrawnBall.transform.SetParent(lastDrawnBallHolder.transform, false);
-
-        pulledBalls.Add(new Ball(newPulledValue, gameLength));
-        Debug.Log(newPulledValue);
         possibleBalls.RemoveAt(index);
 
         if (possibleBalls.Count < 1)
         {
             timer.isPlaying = false;
+            //should notify all players to stop play
         }
 
         lastNumberPull = gameLength;
         return newPulledValue;
+    }
+
+    public void RecievePulledNumber(int newNumber)
+    {
+        MovePreviouslyDrawnBallsASide();
+
+        GameObject lastDrawnBall = Instantiate(drawnBallPrefab);
+        lastDrawnBall.GetComponent<BingoTile>().UpdateLocalValue(newPulledValue);
+        lastDrawnBall.transform.SetParent(lastDrawnBallHolder.transform, false);
+
+        int colorIndex = (newPulledValue - 1) / (ROW_VALUE * NUMBER_THRESHOLD);
+        lastDrawnBall.GetComponent<Image>().color = new Color(COLORS[colorIndex].r, COLORS[colorIndex].g, COLORS[colorIndex].b, 0.25f);
+
+        pulledBalls.Add(new Ball(newPulledValue, gameLength));
+        Debug.Log(newPulledValue);
     }
 
     public void MovePreviouslyDrawnBallsASide()
@@ -304,13 +330,40 @@ public class LocalGameManager : MonoBehaviour
 
                 pulledBalls.Remove(ball);
                 EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
+                powerup.FillMeter(GetMeterFillBasedOnTime((gameLength - ball.timePulled) * 100));
                 return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;
             }
         }
         EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedIncorrectly();
+        powerup.FillMeter(-powerupMissPenalty);
         audio.audioPlayer.PlayOneShot(audio.miss, 0.5f);
         Debug.Log("Ball not Found!");
         return 0;
+    }
+
+    public int GetMeterFillBasedOnTime(float time)
+    {
+        //Debug.Log(time);
+        if (time >= 0 && time < (int)delayValues.VeryFast)
+        {
+            return (int)meterScores.VeryFast;
+        }
+        else if (time >= (int)delayValues.VeryFast && time < (int)delayValues.Fast)
+        {
+            return (int)meterScores.Fast;
+        }
+        else if (time >= (int)delayValues.Fast && time < (int)delayValues.Ok)
+        {
+            return (int)meterScores.Ok;
+        }
+        else if (time >= (int)delayValues.Ok && time < (int)delayValues.Slow)
+        {
+            return (int)meterScores.Slow;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     public int GetPointsMultiplierBasedOnTime(float time)
