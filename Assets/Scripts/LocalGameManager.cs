@@ -25,6 +25,7 @@ public class LocalGameManager : MonoBehaviour
 
     public enum delayValues { VeryFast = 50, Fast = 100, Ok = 200, Slow = 300 };
     public enum delayScores { VeryFast = 5, Fast = 3, Ok = 2, Slow = 1 };
+    public enum meterScores { VeryFast = 100, Fast = 60, Ok = 30, Slow = 15 };
 
     public static readonly int ROW_VALUE = 5;
     public static readonly int NUMBER_THRESHOLD = 3;
@@ -37,9 +38,11 @@ public class LocalGameManager : MonoBehaviour
 
     public ScoreBoard scoreBoard;
     public Timer timer;
+    public Powerup powerup;
 
     public int scoreValue = 100;
     public int bingoValue = 1000;
+    public int powerupMissPenalty = 25;
 
     public float timeIntervals;
     float lastNumberPull;
@@ -327,13 +330,40 @@ public class LocalGameManager : MonoBehaviour
 
                 pulledBalls.Remove(ball);
                 EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
+                powerup.FillMeter(GetMeterFillBasedOnTime((gameLength - ball.timePulled) * 100));
                 return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;
             }
         }
         EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedIncorrectly();
+        powerup.FillMeter(-powerupMissPenalty);
         audio.audioPlayer.PlayOneShot(audio.miss, 0.5f);
         Debug.Log("Ball not Found!");
         return 0;
+    }
+
+    public int GetMeterFillBasedOnTime(float time)
+    {
+        //Debug.Log(time);
+        if (time >= 0 && time < (int)delayValues.VeryFast)
+        {
+            return (int)meterScores.VeryFast;
+        }
+        else if (time >= (int)delayValues.VeryFast && time < (int)delayValues.Fast)
+        {
+            return (int)meterScores.Fast;
+        }
+        else if (time >= (int)delayValues.Fast && time < (int)delayValues.Ok)
+        {
+            return (int)meterScores.Ok;
+        }
+        else if (time >= (int)delayValues.Ok && time < (int)delayValues.Slow)
+        {
+            return (int)meterScores.Slow;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     public int GetPointsMultiplierBasedOnTime(float time)

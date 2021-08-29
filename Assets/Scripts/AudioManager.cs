@@ -7,6 +7,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip miss;
     public AudioClip hit;
     public AudioClip powerup;
+    public AudioClip filledMeter;
     public AudioClip gameover;
     public AudioClip bingo;
 
