@@ -5,7 +5,7 @@ using TMPro;
 
 public class Timer : MonoBehaviour
 {
-    float seconds;
+    public float seconds;
     int minutes;
 
     bool wasGameOverPlayedAlready = false;
@@ -18,9 +18,6 @@ public class Timer : MonoBehaviour
     {
         //Get Initial time setup
         //Get pullInterval
-
-        //Default to replace
-        seconds = 90;
 
         FormatTimeUnits();
         isPlaying = true;
@@ -43,6 +40,13 @@ public class Timer : MonoBehaviour
                 GameOver();
             }
         }
+    }
+
+    public void AddTime(int timeToAdd)
+    {
+        seconds += timeToAdd;
+        FormatTimeUnits();
+
     }
 
     private void FormatTimeUnits()
