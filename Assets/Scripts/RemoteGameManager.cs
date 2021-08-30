@@ -58,6 +58,8 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
             return;
         }
 
+        gameLength = 0;
+
         playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
         playersScore = new int[PhotonNetwork.PlayerList.Length - 1];
 
@@ -157,7 +159,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
             print("Player: " + (i + 1) + ", Points: " + playersScore[i]);
         }
 
-        //ContinueGame();
+        ContinueGame();
     }
 
     public void ContinueGame()

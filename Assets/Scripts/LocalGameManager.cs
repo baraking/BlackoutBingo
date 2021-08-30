@@ -88,9 +88,13 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
         rowValue = newRowValue;
         numberThreshold = newNumberThreshold;
         timer.SetTime(newTime);
+        DeleteExistingBoard();
+        pulledBalls = new List<Ball>();
+        clickedTiles = new List<int>();
         scoreBoard.SetPoints(newScore);
         boardLayout = new int[rowValue, rowValue];
         notEligableForBingo = new bool[(rowValue + 1) * 2];
+        powerup.ResetMeter();
         audio.GetComponent<AudioManager>();
         lastNumberPull = 0;
         GenerateBoardFromGivenData(rowValue, rowValue, newBoardData);
@@ -107,6 +111,14 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
             {
 
             }
+        }
+    }
+
+    private void DeleteExistingBoard()
+    {
+        foreach (Transform child in bingoBoard.transform)
+        {
+            Destroy(child.transform.gameObject);
         }
     }
 
