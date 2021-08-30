@@ -77,9 +77,14 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
     public bool isPlayer;
 
     [PunRPC]
-    void initLocalGameManager(int newTime, int newScore, int newRowValue, int newNumberThreshold, int[] newBoardData)
+    void initLocalGameManager(string targetPlayer, int newTime, int newScore, int newRowValue, int newNumberThreshold, int[] newBoardData)
     {
+        if (PhotonNetwork.LocalPlayer.NickName != targetPlayer)
+        {
+            return;
+        }
         print("Lets Start!");
+        gameLength = 0;
         rowValue = newRowValue;
         numberThreshold = newNumberThreshold;
         timer.SetTime(newTime);
@@ -94,11 +99,12 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
 
     void Update()
     {
+        gameLength += Time.deltaTime;
         if (isPlayer)
         {
             if (timer.isPlaying)
             {
-                gameLength += Time.deltaTime;
+                //gameLength += Time.deltaTime;
             }
         }
     }
@@ -123,8 +129,15 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    [PunRPC]
     public void RecievePulledNumber(int newNumber)
     {
+        if (!timer.isPlaying)
+        {
+            return;
+        }
+
+        newPulledValue = newNumber;
         MovePreviouslyDrawnBallsASide();
 
         GameObject lastDrawnBall = Instantiate(drawnBallPrefab);
@@ -284,6 +297,7 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
 
                 pulledBalls.Remove(ball);
                 EventSystem.current.currentSelectedGameObject.GetComponentInParent<BingoTile>().MarkAsPressedCorrectly();
+                Debug.Log(gameLength + "," + ball.timePulled);
                 powerup.FillMeter(GetMeterFillBasedOnTime((gameLength - ball.timePulled) * 100));
                 return GetPointsMultiplierBasedOnTime((gameLength - ball.timePulled) * 100) * scoreValue;
             }

@@ -45,15 +45,20 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
     public void InitPlayers()
     {
-        print("Init Player!");
-        photonView.RPC("GetMessage", RpcTarget.Others);
-        LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
-    }
 
-    [PunRPC]
-    public void GetMessage()
-    {
-        print("I got the message!");
+
+        Debug.Log("Number of Players: " + PhotonNetwork.CountOfPlayers);
+        Debug.Log("Number of Players: " + PhotonNetwork.PlayerList.Length);
+
+        if (PhotonNetwork.PlayerList.Length<2)
+        {
+            return;
+        }
+        
+        for (int i=2;i<= PhotonNetwork.PlayerList.Length; i++)
+        {
+            LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(),startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+        }
     }
 
     private void Update()
@@ -63,14 +68,14 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
             gameLength += Time.deltaTime;
             if (lastNumberPull + timeIntervals <= gameLength)
             {
-                //send pullNumber to each player
-                //RecievePulledNumber(PullNumber());
+                LocalGameManager.Instance.photonView.RPC("RecievePulledNumber", RpcTarget.Others, PullNumber());
             }
         }
     }
 
     public int[] CreateBoard()
     {
+        possibleBalls = new List<int>();
         for (int i = 0; i < localBoardOptions.GetLength(0); i++)
         {
             localBoardOptions[i] = new List<int>();

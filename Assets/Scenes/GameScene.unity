@@ -235,6 +235,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6226648977562182356, guid: 62083c82e99352b46a38d451799c2d5d, type: 3}
+      propertyPath: playerSpawner
+      value: 
+      objectReference: {fileID: 1375713196}
     - target: {fileID: 6226648977562182357, guid: 62083c82e99352b46a38d451799c2d5d, type: 3}
       propertyPath: m_Name
       value: LocalGameManager
@@ -386,6 +390,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4307337973649939031, guid: d53f663a90240944b8b78570e18e96bd, type: 3}
+      propertyPath: playerSpawner
+      value: 
+      objectReference: {fileID: 1375713196}
     - target: {fileID: 6162472518454150735, guid: d53f663a90240944b8b78570e18e96bd, type: 3}
       propertyPath: sceneViewId
       value: 2

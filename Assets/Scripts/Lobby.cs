@@ -44,6 +44,7 @@ public class Lobby : MonoBehaviourPunCallbacks
                 JoinGame();
             }
             PhotonNetwork.LocalPlayer.NickName = PhotonNetwork.CountOfPlayers.ToString();
+            Debug.Log(PhotonNetwork.LocalPlayer.NickName);
             playerName.text = PhotonNetwork.LocalPlayer.NickName;
         }
         //Debug.Log("Number of Rooms: " + PhotonNetwork.CountOfRooms);
