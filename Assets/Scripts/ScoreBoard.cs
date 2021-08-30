@@ -10,6 +10,8 @@ public class ScoreBoard : MonoBehaviour
 
     public static readonly int ORIGINAL_POINTS_MULTIPLIER = 1;
 
+    bool gameStarted;
+
     private int pointsMultiplier;
     private float multiplierTimeLeft;
 
@@ -18,22 +20,32 @@ public class ScoreBoard : MonoBehaviour
 
     void Start()
     {
-        pointsDisplay.text = FormatPoints();
-        pointsMultiplier = ORIGINAL_POINTS_MULTIPLIER;
-        FormatMultiplier();
+
     }
 
     private void Update()
     {
-        if (multiplierTimeLeft > 0)
+        if (gameStarted)
         {
-            multiplierTimeLeft -= Time.deltaTime;
-            if(multiplierTimeLeft <= 0)
+            if (multiplierTimeLeft > 0)
             {
-                multiplierTimeLeft = 0;
-                ResetMultipliers();
+                multiplierTimeLeft -= Time.deltaTime;
+                if (multiplierTimeLeft <= 0)
+                {
+                    multiplierTimeLeft = 0;
+                    ResetMultipliers();
+                }
             }
         }
+    }
+
+    public void SetPoints(int newPoints)
+    {
+        points = newPoints;
+        pointsDisplay.text = FormatPoints();
+        pointsMultiplier = ORIGINAL_POINTS_MULTIPLIER;
+        FormatMultiplier();
+        gameStarted = true;
     }
 
     public void AddPoints(int extraPoints)

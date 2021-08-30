@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class LocalGameManager : MonoBehaviour
+public class LocalGameManager : MonoBehaviourPunCallbacks
 {
     private static LocalGameManager _instance;
 
@@ -27,9 +28,7 @@ public class LocalGameManager : MonoBehaviour
     public enum delayScores { VeryFast = 5, Fast = 3, Ok = 2, Slow = 1 };
     public enum meterScores { VeryFast = 100, Fast = 60, Ok = 30, Slow = 15 };
 
-    public static readonly int ROW_VALUE = 5;
-    public static readonly int NUMBER_THRESHOLD = 3;
-
+    public PlayerSpawner playerSpawner;
     public static readonly string BINGO = "BINGO";
     public static readonly Color[] COLORS = { Color.blue, Color.red, Color.magenta, Color.green, Color.yellow };
 
@@ -65,35 +64,41 @@ public class LocalGameManager : MonoBehaviour
     [SerializeField]
     public List<Ball> pulledBalls = new List<Ball>();
     [SerializeField]
-    public List<int> possibleBalls = new List<int>();
-    [SerializeField]
     public List<int> clickedTiles = new List<int>();
 
-    [SerializeField]
-    public List<int>[] localBoardOptions = new List<int>[ROW_VALUE];
+    public int[,] boardLayout;
+    public bool[] notEligableForBingo;
 
-    public int[,] boardLayout = new int[ROW_VALUE, ROW_VALUE];
-
-    public bool[] notEligableForBingo = new bool[(ROW_VALUE + 1) * 2];
+    public int rowValue;
+    public int numberThreshold;
 
     public AudioManager audio;
 
-    void Start()
+    public bool isPlayer;
+
+    [PunRPC]
+    void initLocalGameManager(int newTime, int newScore, int newRowValue, int newNumberThreshold, int[] newBoardData)
     {
+        print("Lets Start!");
+        rowValue = newRowValue;
+        numberThreshold = newNumberThreshold;
+        timer.SetTime(newTime);
+        scoreBoard.SetPoints(newScore);
+        boardLayout = new int[rowValue, rowValue];
+        notEligableForBingo = new bool[(rowValue + 1) * 2];
         audio.GetComponent<AudioManager>();
         lastNumberPull = 0;
-        GenerateBoardFromGivenData(ROW_VALUE, ROW_VALUE, CreateBoard());
+        GenerateBoardFromGivenData(rowValue, rowValue, newBoardData);
         audio.audioPlayer.PlayOneShot(audio.casualMusic, 0.25f);
     }
 
     void Update()
     {
-        if (timer.isPlaying)
+        if (isPlayer)
         {
-            gameLength += Time.deltaTime;
-            if (lastNumberPull + timeIntervals <= gameLength)
+            if (timer.isPlaying)
             {
-                RecievePulledNumber(PullNumber());
+                gameLength += Time.deltaTime;
             }
         }
     }
@@ -118,57 +123,6 @@ public class LocalGameManager : MonoBehaviour
         }
     }
 
-    public int[] CreateBoard()
-    {
-        for(int i=0;i< localBoardOptions.GetLength(0); i++)
-        {
-            localBoardOptions[i] = new List<int>();
-            for (int j = 1; j <= ROW_VALUE * NUMBER_THRESHOLD; j++)
-            {
-                localBoardOptions[i].Add(j + i * ROW_VALUE * NUMBER_THRESHOLD);
-                //print(j + i * ROW_VALUE * NUMBER_THRESHOLD);
-                possibleBalls.Add(j + i * ROW_VALUE * NUMBER_THRESHOLD);
-            }
-        }
-
-        var random = new System.Random();
-        int[] boardDataToSend = new int[ROW_VALUE * ROW_VALUE];
-
-        for (int i = 0; i < ROW_VALUE; i++)
-        {
-            GameObject newColNameTile = Instantiate(bingoColNamePrefab);
-            newColNameTile.GetComponent<BingoTile>().UpdateLocalName(BINGO[i].ToString());
-            newColNameTile.GetComponent<Image>().color = COLORS[i];
-            newColNameTile.transform.SetParent(bingoColNamesHeader.transform, false);
-
-            for (int j = 0; j < ROW_VALUE; j++)
-            {
-                int index = random.Next(localBoardOptions[j].Count);
-                boardDataToSend[j+i*ROW_VALUE] = localBoardOptions[j][index];
-                localBoardOptions[j].RemoveAt(index);
-            }
-        }
-        return boardDataToSend;
-    }
-
-    public int PullNumber()
-    {
-        var random = new System.Random();
-        int index = random.Next(possibleBalls.Count);
-        newPulledValue = possibleBalls[index];
-
-        possibleBalls.RemoveAt(index);
-
-        if (possibleBalls.Count < 1)
-        {
-            timer.isPlaying = false;
-            //should notify all players to stop play
-        }
-
-        lastNumberPull = gameLength;
-        return newPulledValue;
-    }
-
     public void RecievePulledNumber(int newNumber)
     {
         MovePreviouslyDrawnBallsASide();
@@ -177,7 +131,7 @@ public class LocalGameManager : MonoBehaviour
         lastDrawnBall.GetComponent<BingoTile>().UpdateLocalValue(newPulledValue);
         lastDrawnBall.transform.SetParent(lastDrawnBallHolder.transform, false);
 
-        int colorIndex = (newPulledValue - 1) / (ROW_VALUE * NUMBER_THRESHOLD);
+        int colorIndex = (newPulledValue - 1) / (rowValue * numberThreshold);
         lastDrawnBall.GetComponent<Image>().color = new Color(COLORS[colorIndex].r, COLORS[colorIndex].g, COLORS[colorIndex].b, 0.25f);
 
         pulledBalls.Add(new Ball(newPulledValue, gameLength));
@@ -229,17 +183,17 @@ public class LocalGameManager : MonoBehaviour
 
         int curCheckValue = 0;
 
-        for(int i=0;i< ROW_VALUE; i++)
+        for(int i=0;i< rowValue; i++)
         {
             curCheckValue = 0;
-            for (int j=0;j< ROW_VALUE; j++)
+            for (int j=0;j< rowValue; j++)
             {
                 if (clickedTiles.Contains(boardLayout[j, i]))
                 {
                     curCheckValue++;
                 }
             }
-            if (curCheckValue== ROW_VALUE && !notEligableForBingo[curBingoCheck])
+            if (curCheckValue== rowValue && !notEligableForBingo[curBingoCheck])
             {
                 curAddedNumberOfBingos++;
                 notEligableForBingo[curBingoCheck] = true;
@@ -248,17 +202,17 @@ public class LocalGameManager : MonoBehaviour
             curBingoCheck++;
         }
 
-        for (int i = 0; i < ROW_VALUE; i++)
+        for (int i = 0; i < rowValue; i++)
         {
             curCheckValue = 0;
-            for (int j = 0; j < ROW_VALUE; j++)
+            for (int j = 0; j < rowValue; j++)
             {
                 if (clickedTiles.Contains(boardLayout[i, j]))
                 {
                     curCheckValue++;
                 }
             }
-            if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
+            if (curCheckValue == rowValue && !notEligableForBingo[curBingoCheck])
             {
                 curAddedNumberOfBingos++;
                 notEligableForBingo[curBingoCheck] = true;
@@ -270,14 +224,14 @@ public class LocalGameManager : MonoBehaviour
         }
 
         curCheckValue = 0;
-        for (int i = 0; i < ROW_VALUE; i++)
+        for (int i = 0; i < rowValue; i++)
         {
             if (clickedTiles.Contains(boardLayout[i, i]))
             {
                 curCheckValue++;
             }
         }
-        if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
+        if (curCheckValue == rowValue && !notEligableForBingo[curBingoCheck])
         {
             curAddedNumberOfBingos++;
             notEligableForBingo[curBingoCheck] = true;
@@ -289,14 +243,14 @@ public class LocalGameManager : MonoBehaviour
         curBingoCheck++;
 
         curCheckValue = 0;
-        for (int i = 0; i < ROW_VALUE; i++)
+        for (int i = 0; i < rowValue; i++)
         {
-            if (clickedTiles.Contains(boardLayout[ROW_VALUE - i - 1, i]))
+            if (clickedTiles.Contains(boardLayout[rowValue - i - 1, i]))
             {
                 curCheckValue++;
             }
         }
-        if (curCheckValue == ROW_VALUE && !notEligableForBingo[curBingoCheck])
+        if (curCheckValue == rowValue && !notEligableForBingo[curBingoCheck])
         {
             curAddedNumberOfBingos++;
             notEligableForBingo[curBingoCheck] = true;

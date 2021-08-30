@@ -11,6 +11,7 @@ public class Timer : MonoBehaviour
     bool wasGameOverPlayedAlready = false;
 
     public bool isPlaying;
+    bool gameStarted;
 
     public TMP_Text countdownDisplay;
 
@@ -19,27 +20,39 @@ public class Timer : MonoBehaviour
         //Get Initial time setup
         //Get pullInterval
 
-        FormatTimeUnits();
-        isPlaying = true;
+        //FormatTimeUnits();
+        //isPlaying = true;
     }
 
     void Update()
     {
-        if (isPlaying)
+        if (gameStarted)
         {
-            seconds -= Time.deltaTime;
-            FormatTimeUnits();
-            //Debug.Log(GetSecondsLeftForGame());
-            countdownDisplay.text = FormatTimer();
-        }
-        else
-        {
-            if (!wasGameOverPlayedAlready)
+            if (isPlaying)
             {
-                wasGameOverPlayedAlready = true;
-                GameOver();
+                seconds -= Time.deltaTime;
+                FormatTimeUnits();
+                //Debug.Log(GetSecondsLeftForGame());
+                countdownDisplay.text = FormatTimer();
+            }
+            else
+            {
+                if (!wasGameOverPlayedAlready)
+                {
+                    wasGameOverPlayedAlready = true;
+                    GameOver();
+                }
             }
         }
+    }
+
+    public void SetTime(int newSeconds)
+    {
+        minutes = 0;
+        seconds = newSeconds;
+        FormatTimeUnits();
+        isPlaying = true;
+        gameStarted = true;
     }
 
     public void AddTime(int timeToAdd)

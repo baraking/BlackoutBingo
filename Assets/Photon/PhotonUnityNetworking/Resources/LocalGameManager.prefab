@@ -1203,7 +1203,7 @@ GameObject:
   - component: {fileID: 6226648977562182356}
   - component: {fileID: 6226648977562182358}
   - component: {fileID: 6226648977562182353}
-  - component: {fileID: 1754634638507559993}
+  - component: {fileID: 1615486898928123597}
   m_Layer: 0
   m_Name: LocalGameManager
   m_TagString: Untagged
@@ -1255,9 +1255,10 @@ MonoBehaviour:
   bingoVisualCue: {fileID: 2941007135755089521, guid: 37503e98da9d8274caa0f1bafbca7bd5, type: 3}
   bingoVisualCuesHolder: {fileID: 6226648978613367458}
   pulledBalls: []
-  possibleBalls: 
   clickedTiles: 
   notEligableForBingo: 000000000000000000000000
+  rowValue: 0
+  numberThreshold: 0
   audio: {fileID: 6226648977562182353}
 --- !u!82 &6226648977562182358
 AudioSource:
@@ -1375,7 +1376,7 @@ MonoBehaviour:
   bingo: {fileID: 8300000, guid: 1a4c4ad105504df47966d1b2c92f96f0, type: 3}
   casualMusic: {fileID: 8300000, guid: 34e6e3c31b86a984ba0c409a7a70535e, type: 3}
   audioPlayer: {fileID: 6226648977562182358}
---- !u!114 &1754634638507559993
+--- !u!114 &1615486898928123597
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

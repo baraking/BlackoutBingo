@@ -6,7 +6,8 @@ using Photon.Pun;
 
 public class PlayerSpawner : MonoBehaviour
 {
-    public GameObject playerPrefab;
+    public LocalGameManager localPlayer;
+    public RemoteGameManager hostPrefab;
 
     private void Awake()
     {
@@ -15,11 +16,20 @@ public class PlayerSpawner : MonoBehaviour
         {
             SpawnPlayer();
         }
+        else
+        {
+            SpawnHost();
+        }
     }
 
     public void SpawnPlayer()
     {
-        //PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0,0,0), Quaternion.identity, 0);
-        Instantiate(playerPrefab);
+        LocalGameManager.Instance.isPlayer = true;
+    }
+
+    public void SpawnHost()
+    {
+        RemoteGameManager.Instance.isHost = true;
+        RemoteGameManager.Instance.InitPlayers();
     }
 }
