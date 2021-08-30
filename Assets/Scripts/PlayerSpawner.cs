@@ -9,7 +9,7 @@ public class PlayerSpawner : MonoBehaviour
     public LocalGameManager localPlayer;
     public RemoteGameManager hostPrefab;
 
-    private void Awake()
+    private void Start()
     {
         Debug.Log(PhotonNetwork.LocalPlayer.NickName);
         if (PhotonNetwork.LocalPlayer.NickName != 1.ToString())

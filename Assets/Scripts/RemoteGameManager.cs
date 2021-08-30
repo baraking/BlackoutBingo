@@ -50,6 +50,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
     public void InitPlayers()
     {
+        Debug.Log("===================================");
         Debug.Log("Number of Players: " + PhotonNetwork.CountOfPlayers);
         Debug.Log("Number of Players: " + PhotonNetwork.PlayerList.Length);
 

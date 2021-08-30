@@ -79,11 +79,12 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void initLocalGameManager(string targetPlayer, int newTime, int newScore, int newRowValue, int newNumberThreshold, int[] newBoardData)
     {
+        Debug.Log(PhotonNetwork.LocalPlayer.NickName);
+        Debug.Log(targetPlayer);
         if (PhotonNetwork.LocalPlayer.NickName != targetPlayer)
         {
             return;
         }
-        print("Lets Start!");
         gameLength = 0;
         rowValue = newRowValue;
         numberThreshold = newNumberThreshold;
@@ -117,6 +118,11 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
     private void DeleteExistingBoard()
     {
         foreach (Transform child in bingoBoard.transform)
+        {
+            Destroy(child.transform.gameObject);
+        }
+
+        foreach (Transform child in bingoVisualCuesHolder.transform)
         {
             Destroy(child.transform.gameObject);
         }
