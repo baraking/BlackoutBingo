@@ -126,6 +126,11 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
         {
             Destroy(child.transform.gameObject);
         }
+
+        foreach (Transform child in bingoColNamesHeader.transform)
+        {
+            Destroy(child.transform.gameObject);
+        }
     }
 
     public void GenerateBoardFromGivenData(int rowValue,int colValue, int[] boardTiles)

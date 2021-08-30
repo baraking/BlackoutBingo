@@ -121,7 +121,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
         if (possibleBalls.Count < 1)
         {
-            //should notify all players to stop play
+            OpenEndGameMenu();
         }
 
         lastNumberPull = gameLength;
