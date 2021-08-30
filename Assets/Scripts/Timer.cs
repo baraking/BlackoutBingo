@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Photon.Pun;
 
 public class Timer : MonoBehaviour
 {
@@ -104,5 +105,6 @@ public class Timer : MonoBehaviour
         Debug.Log("Times Up!");
         LocalGameManager.Instance.audio.audioPlayer.Stop();
         LocalGameManager.Instance.audio.audioPlayer.PlayOneShot(LocalGameManager.Instance.audio.gameover, 0.5f);
+        RemoteGameManager.Instance.photonView.RPC("SendPlayerEndGameData", RpcTarget.Others, int.Parse(PhotonNetwork.LocalPlayer.NickName), LocalGameManager.Instance.scoreBoard.GetPoints());
     }
 }

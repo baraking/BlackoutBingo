@@ -39,6 +39,16 @@ public class ScoreBoard : MonoBehaviour
         }
     }
 
+    public int GetPoints()
+    {
+        return points;
+    }
+
+    public int GetBingos()
+    {
+        return bingos;
+    }
+
     public void SetPoints(int newPoints)
     {
         points = newPoints;

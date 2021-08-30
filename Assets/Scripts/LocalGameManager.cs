@@ -95,6 +95,7 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
         lastNumberPull = 0;
         GenerateBoardFromGivenData(rowValue, rowValue, newBoardData);
         audio.audioPlayer.PlayOneShot(audio.casualMusic, 0.25f);
+        DeletePreviouslyDrawnBalls();
     }
 
     void Update()
@@ -102,9 +103,9 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
         gameLength += Time.deltaTime;
         if (isPlayer)
         {
-            if (timer.isPlaying)
+            if (!timer.isPlaying)
             {
-                //gameLength += Time.deltaTime;
+
             }
         }
     }
@@ -161,6 +162,14 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
         foreach(Transform child in lastDrawnBallHolder.transform)
         {
             child.transform.position -= new Vector3(DRAWN_BALLS_MOVEMENT_DISTANCE, 0, 0);
+        }
+    }
+
+    public void DeletePreviouslyDrawnBalls()
+    {
+        foreach (Transform child in lastDrawnBallHolder.transform)
+        {
+            Destroy(child.transform.gameObject);
         }
     }
 
