@@ -48,6 +48,11 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
     [SerializeField]
     public int[] playersScore;
 
+    private void Start()
+    {
+        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
+    }
+
     public void InitPlayers()
     {
         Debug.Log("===================================");
@@ -192,9 +197,6 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
     public void ExitGame()
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            Application.Quit();
-        }
+        Application.Quit();
     }
 }
