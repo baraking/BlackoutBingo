@@ -81,7 +81,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public int[] CreateBoard()
+    public int[] CreateBoard(int playerNumber)
     {
         possibleBalls = new List<int>();
         for (int i = 0; i < localBoardOptions.GetLength(0); i++)
@@ -95,7 +95,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
             }
         }
 
-        var random = new System.Random();
+        var random = new System.Random(playerNumber+(int)(Time.time*100));
         int[] boardDataToSend = new int[ROW_VALUE * ROW_VALUE];
 
         for (int i = 0; i < ROW_VALUE; i++)
@@ -176,7 +176,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
             for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
             {
-                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, playersScore[i - 2], ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, playersScore[i - 2], ROW_VALUE, NUMBER_THRESHOLD, CreateBoard(i));
             }
         }
     }
@@ -190,7 +190,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
             for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
             {
-                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard(i));
             }
         }
     }
