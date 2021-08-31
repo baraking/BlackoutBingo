@@ -1576,6 +1576,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerNames: {fileID: 847999182}
   ScoreValues: {fileID: 896570826}
+  continueButton: {fileID: 716721086}
+  restartButton: {fileID: 149303717}
 --- !u!1 &1950958623
 GameObject:
   m_ObjectHideFlags: 0

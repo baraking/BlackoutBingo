@@ -159,6 +159,11 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void OpenEndGameMenu(int[] scores)
     {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            LocalGameManager.Instance.endgamePanel.continueButton.interactable = false;
+            LocalGameManager.Instance.endgamePanel.restartButton.interactable = false;
+        }
         LocalGameManager.Instance.endgamePanel.gameObject.SetActive(true);
         LocalGameManager.Instance.endgamePanel.ClearData();
         for (int i = 0; i < scores.Length; i++)
