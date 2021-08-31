@@ -9,6 +9,7 @@ public class Lobby : MonoBehaviourPunCallbacks
 {
 
     public static readonly string DEFAULT_ROOM_NAME = "The only room";
+    public static readonly int TIMEOUT_FOR_CONNECTION = 5;
 
     public bool hasCreatedRoom;
 
@@ -33,19 +34,22 @@ public class Lobby : MonoBehaviourPunCallbacks
     private void Update()
     {
         //Debug.Log("Number of Players: " + PhotonNetwork.CountOfPlayers);
-        if (!hasCreatedRoom && Time.time > 5)
+        if (!hasCreatedRoom && Time.time > TIMEOUT_FOR_CONNECTION)
         {
-            if(PhotonNetwork.CountOfPlayers == 1)
+            PhotonNetwork.LocalPlayer.NickName = PhotonNetwork.CountOfPlayers.ToString();
+            if (PhotonNetwork.CountOfPlayers == 1)
             {
                 CreateGame();
+                playerName.text = "Host is Ready";
             }
             else
             {
                 JoinGame();
+                playerName.text = "Player " + (PhotonNetwork.CountOfPlayers - 1).ToString();
             }
-            PhotonNetwork.LocalPlayer.NickName = PhotonNetwork.CountOfPlayers.ToString();
+            
             //Debug.Log(PhotonNetwork.LocalPlayer.NickName);
-            playerName.text = PhotonNetwork.LocalPlayer.NickName;
+            
         }
         //Debug.Log("Number of Rooms: " + PhotonNetwork.CountOfRooms);
         //print("Are all ready? " + CheckPlayersReady());
@@ -78,6 +82,7 @@ public class Lobby : MonoBehaviourPunCallbacks
 
     public void JoinGame()
     {
+        hasCreatedRoom = true;
         RoomOptions roomOptions = new RoomOptions();
         roomOptions.MaxPlayers = 4;
         PhotonNetwork.JoinRoom(DEFAULT_ROOM_NAME, null);
