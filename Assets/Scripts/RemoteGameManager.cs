@@ -48,8 +48,14 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
     [SerializeField]
     public int[] playersScore;
 
+    private void Start()
+    {
+        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
+    }
+
     public void InitPlayers()
     {
+        Debug.Log("===================================");
         Debug.Log("Number of Players: " + PhotonNetwork.CountOfPlayers);
         Debug.Log("Number of Players: " + PhotonNetwork.PlayerList.Length);
 
@@ -58,15 +64,9 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        gameLength = 0;
-
-        playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
         playersScore = new int[PhotonNetwork.PlayerList.Length - 1];
 
-        for (int i=2;i<= PhotonNetwork.PlayerList.Length; i++)
-        {
-            LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(),startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
-        }
+        RestartGame();
     }
 
     private void Update()
@@ -81,7 +81,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public int[] CreateBoard()
+    public int[] CreateBoard(int playerNumber)
     {
         possibleBalls = new List<int>();
         for (int i = 0; i < localBoardOptions.GetLength(0); i++)
@@ -95,7 +95,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
             }
         }
 
-        var random = new System.Random();
+        var random = new System.Random(playerNumber+(int)(Time.time*100));
         int[] boardDataToSend = new int[ROW_VALUE * ROW_VALUE];
 
         for (int i = 0; i < ROW_VALUE; i++)
@@ -120,7 +120,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
         if (possibleBalls.Count < 1)
         {
-            //should notify all players to stop play
+            CallOpenEndGamePanel();
         }
 
         lastNumberPull = gameLength;
@@ -135,7 +135,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
         if (AreAllPlayersDone())
         {
-            OpenEndGameMenu();
+            CallOpenEndGamePanel();
         }
     }
 
@@ -151,24 +151,57 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
         return true;
     }
 
-    public void OpenEndGameMenu()
+    public void CallOpenEndGamePanel()
     {
-        print("The Game is Over!");
-        for (int i = 0; i < playersScore.Length; i++)
-        {
-            print("Player: " + (i + 1) + ", Points: " + playersScore[i]);
-        }
+        photonView.RPC("OpenEndGameMenu", RpcTarget.All, playersScore);
+    }
 
-        ContinueGame();
+    [PunRPC]
+    public void OpenEndGameMenu(int[] scores)
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            LocalGameManager.Instance.endgamePanel.continueButton.interactable = false;
+            LocalGameManager.Instance.endgamePanel.restartButton.interactable = false;
+        }
+        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(true);
+        LocalGameManager.Instance.endgamePanel.ClearData();
+        for (int i = 0; i < scores.Length; i++)
+        {
+            LocalGameManager.Instance.endgamePanel.AddPlayerData("Player: " + (i + 1), scores[i].ToString());
+        }
     }
 
     public void ContinueGame()
     {
-        playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
-
-        for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+        if (PhotonNetwork.IsMasterClient)
         {
-            LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, playersScore[i - 2], ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+            LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
+            playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
+
+            for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+            {
+                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, playersScore[i - 2], ROW_VALUE, NUMBER_THRESHOLD, CreateBoard(i));
+            }
         }
+    }
+
+    public void RestartGame()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
+            playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
+
+            for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+            {
+                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard(i));
+            }
+        }
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
     }
 }

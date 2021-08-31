@@ -52,6 +52,7 @@ public class Timer : MonoBehaviour
         minutes = 0;
         seconds = newSeconds;
         FormatTimeUnits();
+        wasGameOverPlayedAlready = false;
         isPlaying = true;
         gameStarted = true;
     }

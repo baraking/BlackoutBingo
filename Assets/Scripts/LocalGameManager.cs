@@ -59,6 +59,8 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
     public GameObject bingoVisualCue;
     public GameObject bingoVisualCuesHolder;
 
+    public EndgamePanel endgamePanel;
+
     float gameLength;
 
     [SerializeField]
@@ -79,11 +81,13 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void initLocalGameManager(string targetPlayer, int newTime, int newScore, int newRowValue, int newNumberThreshold, int[] newBoardData)
     {
+        Debug.Log(PhotonNetwork.LocalPlayer.NickName);
+        Debug.Log(targetPlayer);
         if (PhotonNetwork.LocalPlayer.NickName != targetPlayer)
         {
             return;
         }
-        print("Lets Start!");
+        endgamePanel.gameObject.SetActive(false);
         gameLength = 0;
         rowValue = newRowValue;
         numberThreshold = newNumberThreshold;
@@ -117,6 +121,16 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
     private void DeleteExistingBoard()
     {
         foreach (Transform child in bingoBoard.transform)
+        {
+            Destroy(child.transform.gameObject);
+        }
+
+        foreach (Transform child in bingoVisualCuesHolder.transform)
+        {
+            Destroy(child.transform.gameObject);
+        }
+
+        foreach (Transform child in bingoColNamesHeader.transform)
         {
             Destroy(child.transform.gameObject);
         }
