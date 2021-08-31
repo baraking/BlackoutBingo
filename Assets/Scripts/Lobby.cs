@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Realtime;
 using TMPro;
+using UnityEngine.UI;
 
 public class Lobby : MonoBehaviourPunCallbacks
 {
@@ -14,6 +15,7 @@ public class Lobby : MonoBehaviourPunCallbacks
     public bool hasCreatedRoom;
 
     public TMP_Text playerName;
+    public Button startButton;
 
     private void Awake()
     {
@@ -44,6 +46,7 @@ public class Lobby : MonoBehaviourPunCallbacks
             }
             else
             {
+                startButton.interactable = false;
                 JoinGame();
                 playerName.text = "Player " + (PhotonNetwork.CountOfPlayers - 1).ToString();
             }
