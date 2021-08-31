@@ -59,6 +59,8 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
     public GameObject bingoVisualCue;
     public GameObject bingoVisualCuesHolder;
 
+    public EndgamePanel endgamePanel;
+
     float gameLength;
 
     [SerializeField]
@@ -85,6 +87,7 @@ public class LocalGameManager : MonoBehaviourPunCallbacks
         {
             return;
         }
+        endgamePanel.gameObject.SetActive(false);
         gameLength = 0;
         rowValue = newRowValue;
         numberThreshold = newNumberThreshold;

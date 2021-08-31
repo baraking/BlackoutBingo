@@ -59,15 +59,9 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        gameLength = 0;
-
-        playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
         playersScore = new int[PhotonNetwork.PlayerList.Length - 1];
 
-        for (int i=2;i<= PhotonNetwork.PlayerList.Length; i++)
-        {
-            LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(),startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
-        }
+        RestartGame();
     }
 
     private void Update()
@@ -154,22 +148,41 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
     public void OpenEndGameMenu()
     {
+        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(true);
+        LocalGameManager.Instance.endgamePanel.ClearData();
         print("The Game is Over!");
         for (int i = 0; i < playersScore.Length; i++)
         {
             print("Player: " + (i + 1) + ", Points: " + playersScore[i]);
-        }
 
-        ContinueGame();
+            LocalGameManager.Instance.endgamePanel.AddPlayerData("Player: " + (i + 1), playersScore[i].ToString());
+        }
     }
 
     public void ContinueGame()
     {
+        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
         playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
 
         for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
         {
             LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, playersScore[i - 2], ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
         }
+    }
+
+    public void RestartGame()
+    {
+        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
+        playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
+
+        for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+        {
+            LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+        }
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
     }
 }
