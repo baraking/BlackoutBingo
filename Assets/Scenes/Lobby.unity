@@ -338,6 +338,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hasCreatedRoom: 0
   playerName: {fileID: 1175956468}
+  startButton: {fileID: 2118078536}
 --- !u!1 &1005705338
 GameObject:
   m_ObjectHideFlags: 0
