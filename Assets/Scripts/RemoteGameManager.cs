@@ -115,7 +115,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
         if (possibleBalls.Count < 1)
         {
-            OpenEndGameMenu();
+            CallOpenEndGamePanel();
         }
 
         lastNumberPull = gameLength;
@@ -130,7 +130,7 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
 
         if (AreAllPlayersDone())
         {
-            OpenEndGameMenu();
+            CallOpenEndGamePanel();
         }
     }
 
@@ -146,43 +146,55 @@ public class RemoteGameManager : MonoBehaviourPunCallbacks
         return true;
     }
 
-    public void OpenEndGameMenu()
+    public void CallOpenEndGamePanel()
+    {
+        photonView.RPC("OpenEndGameMenu", RpcTarget.All, playersScore);
+    }
+
+    [PunRPC]
+    public void OpenEndGameMenu(int[] scores)
     {
         LocalGameManager.Instance.endgamePanel.gameObject.SetActive(true);
         LocalGameManager.Instance.endgamePanel.ClearData();
-        print("The Game is Over!");
-        for (int i = 0; i < playersScore.Length; i++)
+        for (int i = 0; i < scores.Length; i++)
         {
-            print("Player: " + (i + 1) + ", Points: " + playersScore[i]);
-
-            LocalGameManager.Instance.endgamePanel.AddPlayerData("Player: " + (i + 1), playersScore[i].ToString());
+            LocalGameManager.Instance.endgamePanel.AddPlayerData("Player: " + (i + 1), scores[i].ToString());
         }
     }
 
     public void ContinueGame()
     {
-        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
-        playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
-
-        for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+        if (PhotonNetwork.IsMasterClient)
         {
-            LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, playersScore[i - 2], ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+            LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
+            playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
+
+            for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+            {
+                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, playersScore[i - 2], ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+            }
         }
     }
 
     public void RestartGame()
     {
-        LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
-        playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
-
-        for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+        if (PhotonNetwork.IsMasterClient)
         {
-            LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+            LocalGameManager.Instance.endgamePanel.gameObject.SetActive(false);
+            playersEndGame = new bool[PhotonNetwork.PlayerList.Length - 1];
+
+            for (int i = 2; i <= PhotonNetwork.PlayerList.Length; i++)
+            {
+                LocalGameManager.Instance.photonView.RPC("initLocalGameManager", RpcTarget.Others, i.ToString(), startingTimeInSeconds, startingPoints, ROW_VALUE, NUMBER_THRESHOLD, CreateBoard());
+            }
         }
     }
 
     public void ExitGame()
     {
-        Application.Quit();
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Application.Quit();
+        }
     }
 }
